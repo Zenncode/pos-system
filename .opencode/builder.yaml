@@ -1,0 +1,249 @@
+# AI Builder — single source of truth for models (all $0 via OpenCode Zen + B.AI)
+# Generates: opencode.json + .opencode/agent/*.md model pins
+# Source: AGENTIC_SUBAGENT.md § AI Model Roster (2026-09-04)
+# After editing: quit + restart opencode (config loads once at startup)
+
+version: 2
+
+project:
+  main: bai/glm-5.3-flash
+  # If the main model's usage runs out: edit opencode.json → "model"/"small_model"
+  # to the next entry below, then quit + restart opencode (config is startup-only).
+  main_fallbacks:
+    - bai/qwen3.8-flash
+    - bai/deepseek-v4-flash
+    - opencode/muse-spark-1.3-contributor-free
+    - opencode/muse-spark-1.2-contributor-free
+  small: opencode/nemotron-3.5-lightning-free
+  small_fallbacks:
+    - opencode/deepseek-v4-flash-free
+    - opencode/ling-3.0-flash-fin-free
+    - opencode/muse-spark-1.3-contributor-free
+  default_agent: orchestrator
+  enabled_providers: [bai, opencode]
+
+# ── Fallback policy (usage run out) ─────────────────────────────────────────
+fallback_policy:
+  # A model is "exhausted" on: HTTP 429, quota/credit exhausted, model
+  # unavailable, or 2 consecutive provider 5xx on the same dispatch.
+  trigger: [429, quota-exhausted, model-unavailable, 2x-provider-5xx]
+  retry_on_pinned: 1        # retry ONCE on the pinned model first (transient 429s)
+  then_next_in_chain: true  # re-dispatch SAME agent, IDENTICAL prompt, next model in its `fallbacks`
+  chain_exhausted: pool     # then take the next unused model from `pool`, skipping ones already exhausted this session
+  session_pin: true         # once a worker falls back, keep that model for the whole session (no retry storms)
+  never_paid: true          # fallback targets are free models ONLY — pipeline stays $0
+  strictness_unchanged: true # worker checklist / output contract identical on every model — never weaken a check
+  record_served_by: true    # merged table records `served-by: <model-id>` per row
+  all_exhausted: BLOCKED    # every free model exhausted → 🔴 BLOCKED (model exhaustion), stop — never merge on incomplete tiers
+
+# Global pool — all free models available for fallback, general preference order
+pool:
+  - opencode/nemotron-3.5-lightning-free   # fastest
+  - opencode/nemotron-3-ultra-free         # heaviest reasoner
+  - opencode/muse-spark-1.3-contributor-free
+  - opencode/muse-spark-1.2-contributor-free
+  - opencode/mimo-v2.5-free
+  - opencode/big-pickle
+  - opencode/ling-3.0-flash-fin-free
+  - opencode/deepseek-v4-flash-free
+  - opencode/laguna-s-2.1-free
+  - bai/qwen3.8-flash                      # B.AI free (orchestrator alternates, last resort)
+  - bai/deepseek-v4-flash                  # B.AI free (orchestrator alternates, last resort)
+
+# Tier 0 = pre-flight recon | Tier 1 = every PR, parallel | Tier 2 = after Tier 1 green | Tier 3 = human assist
+tiers:
+  tier0: [scout]
+  tier1: [static-ai, unit-ai, mutation-ai, reviewer]
+  tier2: [integration-ai, smoke-ai, regression-ai, perf-ai, security-ai]
+  tier3: [e2e-ai, acceptance-ai, experiment-ai]
+  verify: [verifier]
+
+# Per-agent fallback chains: pinned model first, then degrade gracefully
+# toward models that still fit the role (speed for fast workers, reasoning for deep ones).
+agents:
+  orchestrator:
+    model: bai/glm-5.3-flash
+    fallbacks:
+      - bai/qwen3.8-flash
+      - bai/deepseek-v4-flash
+      - opencode/muse-spark-1.3-contributor-free
+      - opencode/muse-spark-1.2-contributor-free
+    mode: primary
+    tier: orchestrator
+    why: best free generalist, conductor only — never tests itself
+  scout:
+    model: opencode/nemotron-3-ultra-free
+    fallbacks:
+      - bai/qwen3.8-flash              # B.AI cross-fallback (previous pin, fastest)
+      - opencode/big-pickle
+      - opencode/muse-spark-1.3-contributor-free
+      - opencode/laguna-s-2.1-free
+    mode: subagent
+    tier: 0
+    why: heaviest free reasoner, pre-flight recon — blast-radius map + dispatch plan before any tier
+  static-ai:
+    model: opencode/nemotron-3.5-lightning-free
+    fallbacks:
+      - opencode/deepseek-v4-flash-free
+      - opencode/ling-3.0-flash-fin-free
+      - opencode/mimo-v2.5-free
+      - opencode/nemotron-3-ultra-free
+    mode: subagent
+    tier: 1
+    why: fastest free, lint + secrets + quality-check explainer
+  unit-ai:
+    model: opencode/nemotron-3.5-lightning-free
+    fallbacks:
+      - opencode/deepseek-v4-flash-free
+      - opencode/ling-3.0-flash-fin-free
+      - opencode/mimo-v2.5-free
+      - opencode/nemotron-3-ultra-free
+    mode: subagent
+    tier: 1
+    why: fastest free, edge-case gen on every push
+  mutation-ai:
+    model: opencode/nemotron-3-ultra-free
+    fallbacks:
+      - opencode/big-pickle
+      - opencode/muse-spark-1.3-contributor-free
+      - opencode/deepseek-v4-flash-free
+      - opencode/laguna-s-2.1-free
+    mode: subagent
+    tier: 1
+    scope: changed-files-only
+    why: heaviest free reasoner, kills +/-, &&/|| mutants
+  reviewer:
+    model: opencode/muse-spark-1.3-contributor-free
+    fallbacks:
+      - bai/deepseek-v4-flash          # B.AI cross-fallback (DeepSeek code-reasoning)
+      - opencode/muse-spark-1.2-contributor-free
+      - opencode/big-pickle
+      - opencode/laguna-s-2.1-free
+    mode: subagent
+    tier: 1
+    why: best free generalist judgment, human-style logic/design/API review every PR
+  integration-ai:
+    model: opencode/nemotron-3-ultra-free
+    fallbacks:
+      - opencode/muse-spark-1.3-contributor-free
+      - opencode/muse-spark-1.2-contributor-free
+      - opencode/big-pickle
+      - opencode/laguna-s-2.1-free
+    mode: subagent
+    tier: 2
+    why: holds schema + migration + API contract context
+  smoke-ai:
+    model: opencode/nemotron-3.5-lightning-free
+    fallbacks:
+      - opencode/ling-3.0-flash-fin-free
+      - opencode/deepseek-v4-flash-free
+      - opencode/mimo-v2.5-free
+    mode: subagent
+    tier: 2
+    why: cheapest/fastest, <60s boot+login+dashboard check
+  regression-ai:
+    model: opencode/mimo-v2.5-free
+    fallbacks:
+      - opencode/muse-spark-1.3-contributor-free
+      - opencode/deepseek-v4-flash-free
+      - opencode/nemotron-3.5-lightning-free
+      - opencode/laguna-s-2.1-free
+    mode: subagent
+    tier: 2
+    why: diff-to-test ranking + flaky detection
+  perf-ai:
+    model: opencode/mimo-v2.5-free
+    fallbacks:
+      - opencode/deepseek-v4-flash-free
+      - opencode/ling-3.0-flash-fin-free
+      - opencode/muse-spark-1.3-contributor-free
+      - opencode/nemotron-3.5-lightning-free
+    mode: subagent
+    tier: 2
+    when: api-routes-changed-only
+    why: k6 scripts + p95 tables
+  security-ai:
+    model: opencode/nemotron-3-ultra-free
+    fallbacks:
+      - opencode/big-pickle
+      - opencode/muse-spark-1.3-contributor-free
+      - opencode/laguna-s-2.1-free
+      - opencode/deepseek-v4-flash-free
+    mode: subagent
+    tier: 2
+    why: CVE triage, ZAP/Nuclei noise filter
+  e2e-ai:
+    model: opencode/muse-spark-1.3-contributor-free
+    fallbacks:
+      - opencode/muse-spark-1.2-contributor-free
+      - opencode/mimo-v2.5-free
+      - opencode/deepseek-v4-flash-free
+      - opencode/nemotron-3.5-lightning-free
+    mode: subagent
+    tier: 3
+    why: Playwright log triage, text-logs-only (no vision on free)
+  acceptance-ai:
+    model: opencode/muse-spark-1.3-contributor-free
+    fallbacks:
+      - opencode/muse-spark-1.2-contributor-free
+      - opencode/laguna-s-2.1-free
+      - opencode/mimo-v2.5-free
+      - opencode/deepseek-v4-flash-free
+    mode: subagent
+    tier: 3
+    why: strict ticket-criterion to evidence mapping
+  experiment-ai:
+    model: opencode/big-pickle
+    fallbacks:
+      - opencode/ling-3.0-flash-fin-free
+      - opencode/muse-spark-1.3-contributor-free
+      - opencode/mimo-v2.5-free
+      - opencode/nemotron-3-ultra-free
+    mode: subagent
+    tier: 3
+    when: feature-flag-touched-only
+    why: flag bucketing logic; Ling fallback for stats math
+  verifier:
+    model: bai/qwen3.8-flash
+    fallbacks:
+      - bai/deepseek-v4-flash          # B.AI sibling (cross-fallback within provider)
+      - opencode/nemotron-3-ultra-free
+      - opencode/big-pickle
+      - opencode/muse-spark-1.3-contributor-free
+    mode: subagent
+    tier: verify
+    why: fast B.AI flash (GLM sibling), final evidence + ratchet gate, runs last
+  employee:
+    model: opencode/muse-spark-1.3-contributor-free
+    fallbacks:
+      - opencode/muse-spark-1.2-contributor-free
+      - opencode/big-pickle
+      - opencode/deepseek-v4-flash-free
+      - opencode/laguna-s-2.1-free
+    mode: subagent
+    tier: build
+    scope: employee-management
+    why: employee CRUD + shifts + roles for POS system
+
+# Sides share all agents/tiers above. Only extra pins: UI/UX lives on frontend.
+# Backend uses the shared roster as-is — no extra pins needed, so it stays empty.
+sides:
+  frontend:
+    uiux:
+      designer: opencode/muse-spark-1.3-contributor-free
+      designer_fallbacks:
+        - opencode/muse-spark-1.2-contributor-free
+        - opencode/laguna-s-2.1-free
+      fast-iterator: opencode/nemotron-3.5-lightning-free
+      fast-iterator_fallbacks:
+        - opencode/deepseek-v4-flash-free
+        - opencode/ling-3.0-flash-fin-free
+      consistency: opencode/mimo-v2.5-free
+      consistency_fallbacks:
+        - opencode/muse-spark-1.3-contributor-free
+        - opencode/nemotron-3.5-lightning-free
+      a11y-check: opencode/nemotron-3-ultra-free
+      a11y-check_fallbacks:
+        - opencode/big-pickle
+        - opencode/muse-spark-1.3-contributor-free
+  backend: {}

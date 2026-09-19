@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "bai/glm-5.3-flash",
+  "small_model": "bai/glm-5.3-flash",
+  "default_agent": "orchestrator",
+  "instructions": ["AGENTIC_SUBAGENT.md"],
+  "enabled_providers": ["bai", "opencode"]
+}

@@ -1,0 +1,2 @@
+# Run static and security checks before each commit.
+pnpm run lint

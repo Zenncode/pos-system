@@ -1,0 +1,14 @@
+# Project root
+.opencode/node_modules
+.opencode/package-lock.json
+.opencode/.gitignore
+.stryker-tmp
+POS-APP/.stryker-tmp
+POS-APP/node_modules
+POS-APP/package-lock.json
+POS-APP/.react-router
+POS-API/dist
+POS-API/node_modules
+POS-API/package-lock.json
+*.log
+.DS_Store
