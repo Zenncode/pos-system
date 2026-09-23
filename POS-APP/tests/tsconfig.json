@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["components/**/*", "unit/**/*", "setup.ts"],
+  "exclude": ["node_modules", "e2e"],
+  "compilerOptions": {
+    "types": ["node", "@testing-library/jest-dom/vitest"],
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "~/*": ["../app/*"]
+    },
+    "noEmit": true
+  }
+}

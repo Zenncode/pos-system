@@ -35,9 +35,18 @@ export default function Register(): JSX.Element {
   const { lines, totals, add, inc, dec, setQty, remove, clear, setDiscount, pendingSync, setPendingSync } = useCart();
   const { push } = useToast();
   const { demoMode } = useAuth();
-  const { shift, loading: shiftLoading } = useShift();
+  const { shift, loading: shiftLoading, open: openShift } = useShift();
   const navigate = useNavigate();
   const shiftOpen = !!shift && shift.status === "OPEN";
+
+  async function quickOpenShift(): Promise<void> {
+    try {
+      await openShift([{ denomination: 100000, count: 1 }], "Quick open from register");
+      push("success", "Shift opened with ₱1,000.00 initial float");
+    } catch {
+      push("error", "Failed to open shift. Open from Shift menu.");
+    }
+  }
 
   // Real-time socket for order:created, stock:low, session:revoked
   const storeId = shift?.storeId ?? null;
@@ -374,36 +383,62 @@ setCharging(true);
   }
 
   return (
-    <div className="flex h-full min-h-0">
+    <div className="flex h-full min-h-0 bg-slate-50">
       {/* Left rail — 240px */}
-      <div className="flex w-[240px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg)]">
-        <div className="p-3">
-          <Input
-            ref={searchRef}
-            placeholder="Search or scan…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void onSearchEnter();
-            }}
-            aria-label="Search products"
-            autoFocus
-          />
+      <div className="flex w-[240px] shrink-0 flex-col border-r border-slate-200/90 bg-white">
+        <div className="p-3 border-b border-slate-100">
+          <div className="relative">
+            <Input
+              ref={searchRef}
+              placeholder="Search SKU or scan… (F2)"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void onSearchEnter();
+              }}
+              aria-label="Search products"
+              autoComplete="off"
+              spellCheck={false}
+              autoFocus
+              className="text-xs pr-7"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
+        <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2 space-y-0.5" role="tablist" aria-label="Categories">
           <button
             onClick={() => setCatId("")}
             aria-current={catId === "" ? "true" : undefined}
-            className={`mb-1 flex w-full items-center justify-between px-3 py-2 text-sm ${catId === "" ? "border-l-2 border-emerald-700 bg-[var(--color-surface-hover)] font-medium text-[var(--color-text)]" : "border-transparent text-[var(--color-neutral-700)] hover:bg-[var(--color-surface)]"}`}
+            className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+              catId === ""
+                ? "bg-emerald-50 text-emerald-900 font-semibold shadow-xs"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            }`}
           >
-            All items
+            <span>All items</span>
+            <span className="rounded-full bg-slate-100 px-1.5 py-0.2 text-[10px] text-slate-500 font-mono">
+              {products.length}
+            </span>
           </button>
           {categories.map((c) => (
             <button
               key={c.id}
               onClick={() => setCatId(c.id)}
               aria-current={catId === c.id ? "true" : undefined}
-              className={`mb-1 flex w-full items-center px-3 py-2 text-sm ${catId === c.id ? "border-l-2 border-emerald-700 bg-[var(--color-surface-hover)] font-medium text-[var(--color-text)]" : "border-transparent text-[var(--color-neutral-700)] hover:bg-[var(--color-surface)]"}`}
+              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                catId === c.id
+                  ? "bg-emerald-50 text-emerald-900 font-semibold shadow-xs"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+              }`}
             >
               <span className="truncate">{c.name}</span>
             </button>
@@ -416,11 +451,38 @@ setCharging(true);
         {shiftLoading ? (
           <Spinner />
         ) : !shiftOpen ? (
-          <div className="pt-16">
-            <EmptyState
-              title="Open a shift to start selling"
-              action={<Button variant="primary" onClick={() => navigate("/shift")}>Open shift</Button>}
-            />
+          <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+            <div className="max-w-md w-full rounded-2xl border border-slate-200/90 bg-white p-8 shadow-sm">
+              <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-8 ring-amber-50/60 mb-4">
+                <svg className="size-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">Shift is Currently Closed</h3>
+              <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                To start ringing up sales and track cash drawer balances, open a shift drawer with an initial cash float.
+              </p>
+              <div className="mt-6 flex flex-col gap-2.5">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  full
+                  onClick={() => void quickOpenShift()}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm"
+                >
+                  ⚡ Quick Open (₱1,000.00 Float)
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  full
+                  onClick={() => navigate("/shift")}
+                  className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs"
+                >
+                  Count Custom Cash Float & Open Drawer →
+                </Button>
+              </div>
+            </div>
           </div>
         ) : loading ? (
           <Spinner />
@@ -500,29 +562,49 @@ setCharging(true);
               <span>Pending sync — order saved offline</span>
             </div>
           )}
-          <dl className="space-y-1 text-sm tabular-nums">
-            <div className="flex justify-between"><dd>{formatCents(totals.subtotalCents)}</dd></div>
-            <div className="flex justify-between"><dd>{formatCents(totals.taxCents)}</dd></div>
+          <dl className="space-y-1.5 text-xs text-slate-600 tabular-nums">
+            <div className="flex justify-between">
+              <dt className="text-slate-500 font-medium">Subtotal</dt>
+              <dd className="font-semibold text-slate-800">{formatCents(totals.subtotalCents)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-slate-500 font-medium">Tax</dt>
+              <dd className="font-semibold text-slate-800">{formatCents(totals.taxCents)}</dd>
+            </div>
             {totals.discountCents > 0 && (
-              <div className="flex justify-between text-[var(--color-danger)]"><dd>−{formatCents(totals.discountCents)}</dd></div>
+              <div className="flex justify-between text-rose-600 font-semibold">
+                <dt className="font-medium">Discount</dt>
+                <dd>−{formatCents(totals.discountCents)}</dd>
+              </div>
             )}
-            <div className="flex justify-between border-t border-[var(--color-border)] pt-2 text-xl font-semibold">
-              <dd className="text-[var(--color-success)]" aria-live="polite">{formatCents(totals.totalCents)}</dd>
+            <div className="flex items-baseline justify-between border-t border-slate-200/80 pt-2 text-sm font-bold">
+              <dt className="text-slate-900 font-bold text-sm">Total Due</dt>
+              <dd className="text-2xl font-black text-emerald-600 tabular-nums" aria-live="polite">{formatCents(totals.totalCents)}</dd>
             </div>
           </dl>
-          <Button
-            variant="primary"
-            size="lg"
-            full
-            loading={charging}
-            onClick={() => {
-              if (!shiftOpen) { navigate("/shift"); return; }
-              setPayOpen(true);
-            }}
-            disabled={lines.length === 0 || !shiftOpen}
-          >
-            Charge {formatCents(totals.totalCents)} <kbd className="kbd">F8</kbd>
-          </Button>
+          <div className="mt-4">
+            <Button
+              variant="primary"
+              size="lg"
+              full
+              loading={charging}
+              onClick={() => {
+                if (!shiftOpen) { navigate("/shift"); return; }
+                setPayOpen(true);
+              }}
+              disabled={lines.length === 0 || !shiftOpen}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base py-3.5 shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+            >
+              <span>Charge {formatCents(totals.totalCents)}</span>
+              <kbd className="rounded bg-emerald-700/80 px-2 py-0.5 text-xs font-mono font-normal text-emerald-100">F8</kbd>
+            </Button>
+          </div>
+          {/* Quick Shortcuts Bar */}
+          <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400 font-medium px-1">
+            <span><kbd className="font-mono text-[9px] bg-slate-200/80 px-1 py-0.5 rounded text-slate-600">F2</kbd> Search</span>
+            <span><kbd className="font-mono text-[9px] bg-slate-200/80 px-1 py-0.5 rounded text-slate-600">F4</kbd> Disc</span>
+            <span><kbd className="font-mono text-[9px] bg-slate-200/80 px-1 py-0.5 rounded text-slate-600">F8</kbd> Pay</span>
+          </div>
         </div>
       </div>
 
@@ -569,23 +651,77 @@ setCharging(true);
           </div>
 
           {payTab === "CASH" ? (
-            <>
-              <Input value={tendered} onChange={(e) => setTendered(e.target.value)} placeholder="0.00" autoFocus />
-              <div className="mt-2 flex gap-2">
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-700">Cash Received</label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₱</span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={tendered}
+                    onChange={(e) => setTendered(e.target.value)}
+                    placeholder="0.00"
+                    autoFocus
+                    className="h-11 w-full rounded-xl border border-slate-300 pl-8 pr-3 text-lg font-mono font-bold text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  />
+                </div>
+              </div>
+
+              {/* Quick Cash Chips */}
+              <div className="flex gap-1.5">
                 {QUICK_CASH.map((c) => (
                   <button
                     key={c}
+                    type="button"
                     onClick={() => setTendered(c === 0 ? (totals.totalCents / 100).toFixed(2) : (c / 100).toFixed(2))}
-                    className="flex-1 rounded-lg border border-[var(--color-border)] px-2 py-2 text-sm hover:bg-[var(--color-surface)]"
+                    className="flex-1 rounded-lg border border-slate-200 bg-slate-50 py-2 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-800 transition-colors active:scale-95"
                   >
                     {c === 0 ? "Exact" : formatCents(c)}
                   </button>
                 ))}
               </div>
-              <p className="mt-2 text-sm tabular-nums text-[var(--color-success)] font-semibold">
-                {formatCents(Math.max(0, tenderedCents - totals.totalCents))}
-              </p>
-            </>
+
+              {/* Touch Keypad */}
+              <div className="grid grid-cols-3 gap-1.5 pt-1">
+                {["1", "2", "3", "4", "5", "6", "7", "8", "9", "C", "0", "."].map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => {
+                      if (k === "C") setTendered("");
+                      else if (k === "." && tendered.includes(".")) return;
+                      else setTendered((prev) => prev + k);
+                    }}
+                    className={`rounded-lg py-2.5 text-sm font-semibold transition-all active:scale-95 ${
+                      k === "C"
+                        ? "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                        : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-300 shadow-xs"
+                    }`}
+                  >
+                    {k}
+                  </button>
+                ))}
+              </div>
+
+              {/* Change due / Remaining Banner */}
+              {tenderedCents >= totals.totalCents ? (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 p-3 text-center">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
+                    Change Due to Customer
+                  </span>
+                  <p className="text-2xl font-black text-emerald-600 tabular-nums">
+                    {formatCents(tenderedCents - totals.totalCents)}
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-center">
+                  <span className="text-xs font-medium text-amber-800">
+                    Remaining to Pay: <strong className="font-bold">{formatCents(totals.totalCents - tenderedCents)}</strong>
+                  </span>
+                </div>
+              )}
+            </div>
           ) : payTab === "SPLIT" ? (
             <div>
               {tenders.map((t, i) => (

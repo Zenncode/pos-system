@@ -1,3 +1,9 @@
+process.env.DATABASE_URL = 'postgresql://test:test@127.0.0.1:5432/test';
+process.env.JWT_SECRET = 'test-secret';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret';
+process.env.REDIS_ENABLED = 'false';
+process.env.QUEUE_ENABLED = 'false';
+
 import { AppError } from '../../app/common/errors';
 
 jest.mock('@prisma/client', () => ({

@@ -35,13 +35,15 @@ function FloatGrid({
   onChange: (v: Record<number, number>) => void;
 }): JSX.Element {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
       {DENOMINATIONS_CENTS.map((d) => (
         <div
           key={d}
-          className="flex items-center justify-between gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2"
+          className="flex items-center justify-between gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/80 p-2.5 shadow-xs transition hover:border-[var(--color-neutral-300)]"
         >
-          <span className="text-sm tabular-nums text-[var(--color-neutral-700)]">{formatCents(d)}</span>
+          <span className="text-xs font-semibold tabular-nums text-[var(--color-neutral-700)]">
+            {formatCents(d)}
+          </span>
           <div className="w-20 shrink-0">
             <Input
               id={`float-${d}`}
@@ -55,7 +57,7 @@ function FloatGrid({
                 const n = Math.max(0, Math.floor(Number(e.target.value) || 0));
                 onChange({ ...values, [d]: n });
               }}
-              className="text-center tabular-nums"
+              className="text-center font-mono font-semibold tabular-nums"
             />
           </div>
         </div>
@@ -64,10 +66,23 @@ function FloatGrid({
   );
 }
 
+function breakdownCentsToCounts(cents: number): Record<number, number> {
+  const result: Record<number, number> = {};
+  let rem = Math.max(0, cents);
+  for (const d of DENOMINATIONS_CENTS) {
+    if (rem >= d) {
+      const cnt = Math.floor(rem / d);
+      result[d] = cnt;
+      rem -= cnt * d;
+    }
+  }
+  return result;
+}
+
 const DEVICE_LABELS = [
-  { key: "scanner", label: "Barcode scanner" },
-  { key: "printer", label: "Receipt printer" },
-  { key: "reader", label: "Card / QR reader" },
+  { key: "scanner", label: "Barcode scanner", icon: "📟" },
+  { key: "printer", label: "Receipt printer", icon: "🖨️" },
+  { key: "reader", label: "Card / QR reader", icon: "💳" },
 ] as const;
 
 export default function ShiftScreen(): JSX.Element {
@@ -187,55 +202,136 @@ export default function ShiftScreen(): JSX.Element {
     }
     const faulty = DEVICE_LABELS.filter((d) => !devices[d.key]);
     return (
-      <div className="mx-auto h-full max-w-2xl overflow-y-auto p-4 sm:p-6">
-        <h2 className="text-lg font-semibold text-[var(--color-text)]">Open shift</h2>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          Count the drawer float before your first sale. Sales are blocked until a shift is open.
-        </p>
-
-        <div className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-sm font-medium text-[var(--color-text)]">Opening float</p>
-            <p className={`text-sm font-semibold tabular-nums ${floatTotal > 0 ? "text-[var(--color-success)]" : "text-[var(--color-text-muted)]"}`}>{formatCents(floatTotal)}</p>
+      <div className="mx-auto h-full max-w-3xl overflow-y-auto p-4 sm:p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[var(--color-border)] pb-4">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-[var(--color-text)]">Open shift</h2>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+              Count the drawer float before your first sale. Sales are blocked until a shift is open.
+            </p>
           </div>
+          <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 border border-amber-500/20">
+            <span className="h-2 w-2 rounded-full bg-amber-500" />
+            Shift Closed
+          </span>
+        </div>
+
+        {/* Float Count Card */}
+        <div className="glass-panel rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-[var(--color-text)]">Opening float</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Count physical bills and coins</p>
+            </div>
+            <div className="text-right">
+              <span className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] font-medium">Total float</span>
+              <p className={`text-2xl font-bold font-mono tabular-nums ${floatTotal > 0 ? "text-[var(--color-primary)]" : "text-[var(--color-text-muted)]"}`}>
+                {formatCents(floatTotal)}
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Presets */}
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-[var(--color-neutral-100)]/70 p-2 text-xs">
+            <span className="font-semibold text-[var(--color-neutral-600)] pl-1">⚡ Quick Float:</span>
+            <button
+              type="button"
+              onClick={() => setCounts({ 50000: 1, 20000: 2, 10000: 1 })}
+              className="rounded-lg bg-[var(--color-bg)] px-3 py-1 font-medium text-[var(--color-neutral-800)] shadow-xs border border-[var(--color-border)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+            >
+              ₱1,000 Float
+            </button>
+            <button
+              type="button"
+              onClick={() => setCounts({ 100000: 1, 50000: 1, 20000: 2, 10000: 1 })}
+              className="rounded-lg bg-[var(--color-bg)] px-3 py-1 font-medium text-[var(--color-neutral-800)] shadow-xs border border-[var(--color-border)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+            >
+              ₱2,000 Float
+            </button>
+            <button
+              type="button"
+              onClick={() => setCounts({})}
+              className="ml-auto rounded-lg px-2 py-1 text-[var(--color-neutral-500)] hover:text-[var(--color-danger)] transition"
+            >
+              Reset
+            </button>
+          </div>
+
           <FloatGrid values={counts} onChange={setCounts} />
+
           {/* FR-07 */}
           {floatTotal === 0 ? (
-            <p className="mt-2 text-xs text-[var(--color-text-muted)]">Enter at least one denomination count.</p>
+            <p className="mt-3 text-xs text-[var(--color-danger)] font-medium">Enter at least one denomination count.</p>
           ) : null}
         </div>
 
-        <div className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+        {/* Device Check Card */}
+        <div className="glass-panel rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm">
           {/* FR-08 */}
-          <p className="text-sm font-medium text-[var(--color-text)]">Device check</p>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-[var(--color-text)]">Hardware &amp; device check</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Verify peripherals before starting shift</p>
+            </div>
+            <span className="text-xs text-[var(--color-text-muted)]">Click to toggle test status</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {DEVICE_LABELS.map((d) => (
               <button
                 key={d.key}
+                type="button"
                 aria-pressed={devices[d.key]}
                 onClick={() => setDevices((prev) => ({ ...prev, [d.key]: !prev[d.key] }))}
-                className={`rounded-lg border px-3 py-1.5 text-sm ${
+                className={`flex items-center justify-between gap-3 rounded-xl border p-3 text-left transition ${
                   devices[d.key]
-                    ? "border-[var(--color-success)] bg-[var(--color-success)]/10 text-[var(--color-success)]"
-                    : "border-[var(--color-danger)] bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
+                    ? "border-emerald-500/40 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300 hover:border-emerald-500"
+                    : "border-rose-500/40 bg-rose-500/5 text-rose-800 dark:text-rose-300 hover:border-rose-500"
                 }`}
               >
-                {d.label}: {devices[d.key] ? "OK" : "Fault"}
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl">{d.icon}</span>
+                  <div>
+                    <span className="text-xs font-semibold block">{d.label}</span>
+                    <span className="text-[10px] text-[var(--color-text-muted)]">
+                      {devices[d.key] ? "Ready & connected" : "Hardware fault"}
+                    </span>
+                  </div>
+                </div>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                  devices[d.key]
+                    ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+                    : "bg-rose-500/20 text-rose-700 dark:text-rose-300"
+                }`}>
+                  {devices[d.key] ? "OK" : "Fault"}
+                </span>
               </button>
             ))}
           </div>
           {faulty.length > 0 ? (
-            <p className="mt-2 text-xs text-[var(--color-warning)]">
-              Fault logged for: {faulty.map((f) => f.label).join(", ")}. You can still open and sell — faults appear in the Z-report.
+            <p className="mt-3 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5 text-xs text-amber-800 dark:text-amber-300">
+              ⚠️ Fault logged for: {faulty.map((f) => f.label).join(", ")}. You can still open and sell — faults appear in the Z-report.
             </p>
           ) : null}
         </div>
 
-        <div className="mt-4">
-          <Input label="Note (optional)" value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. drawer sealed, tape #123" />
+        <div>
+          <Input
+            label="Shift notes (optional)"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="e.g. drawer sealed, tape #123, morning opening notes"
+          />
         </div>
 
-        <Button variant="primary" size="lg" full className="mt-4" onClick={() => void doOpen()} loading={busy} disabled={floatTotal <= 0}>
+        <Button
+          variant="primary"
+          size="lg"
+          full
+          className="mt-2 py-3.5 text-base font-semibold shadow-md glow-emerald"
+          onClick={() => void doOpen()}
+          loading={busy}
+          disabled={floatTotal <= 0}
+        >
           Open shift &amp; start selling
         </Button>
       </div>
@@ -244,55 +340,112 @@ export default function ShiftScreen(): JSX.Element {
 
   // ── Close shift (FR-10/11/12, UC-12) ──
   return (
-    <div className="mx-auto h-full max-w-2xl overflow-y-auto p-4 sm:p-6">
-      <h2 className="text-lg font-semibold text-[var(--color-text)]">Close shift</h2>
-      <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-        Started {formatDateTime(openSince ?? "")} · {shiftOrders.length} orders · {formatCents(sales)} sales.
-        Closing ends your session (FR-04).
-      </p>
-
-      <dl className="mt-4 grid grid-cols-2 gap-2 text-sm">
-        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-          <dt className="text-[var(--color-text-muted)]">Opening float</dt>
-          <dd className="mt-1 text-base font-semibold tabular-nums text-[var(--color-text)]">{formatCents(openingFloatCents)}</dd>
+    <div className="mx-auto h-full max-w-3xl overflow-y-auto p-4 sm:p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[var(--color-border)] pb-4">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight text-[var(--color-text)]">Close shift</h2>
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+            Started {formatDateTime(openSince ?? "")} · {shiftOrders.length} orders · {formatCents(sales)} sales. Closing ends your session (FR-04).
+          </p>
         </div>
-        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
-          <dt className="text-[var(--color-text-muted)]">Expected cash</dt>
-          <dd className="mt-1 text-base font-semibold tabular-nums text-[var(--color-text)]">
+        <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          Shift Active
+        </span>
+      </div>
+
+      {/* Financial KPI Cards */}
+      <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+        <div className="glass-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+          <dt className="text-xs font-medium text-[var(--color-text-muted)]">Opening float</dt>
+          <dd className="mt-1.5 text-lg font-bold tabular-nums text-[var(--color-text)] font-mono">{formatCents(openingFloatCents)}</dd>
+        </div>
+        <div className="glass-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+          <dt className="text-xs font-medium text-[var(--color-text-muted)]">Shift sales</dt>
+          <dd className="mt-1.5 text-lg font-bold tabular-nums text-[var(--color-primary)] font-mono">{formatCents(sales)}</dd>
+        </div>
+        <div className="glass-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+          <dt className="text-xs font-medium text-[var(--color-text-muted)]">Expected cash</dt>
+          <dd className="mt-1.5 text-lg font-bold tabular-nums text-[var(--color-text)] font-mono">
             {ordersLoading ? "…" : formatCents(expected)}
+          </dd>
+        </div>
+        <div className="glass-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+          <dt className="text-xs font-medium text-[var(--color-text-muted)]">Variance</dt>
+          <dd className={`mt-1.5 text-lg font-bold tabular-nums font-mono ${variance === 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
+            {formatCents(variance)}
           </dd>
         </div>
       </dl>
 
       {pending.length > 0 ? (
-        <div className="mt-4 rounded-lg border border-[var(--color-warning)] bg-[var(--color-warning)]/10 p-3 text-sm text-[var(--color-text)]">
-          {pending.length} pending sale{pending.length > 1 ? "s" : ""} must be completed or voided before closing (FR-11).{" "}
-          <Link to="/orders" className="font-medium underline">
-            Go to Orders
+        <div className="rounded-xl border border-[var(--color-warning)] bg-[var(--color-warning)]/10 p-4 text-sm text-[var(--color-text)] flex items-center justify-between">
+          <div>
+            <span className="font-semibold text-amber-800 dark:text-amber-300">⚠️ Pending orders blocking close:</span>
+            <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+              {pending.length} pending sale{pending.length > 1 ? "s" : ""} must be completed or voided before closing (FR-11).
+            </p>
+          </div>
+          <Link
+            to="/orders"
+            className="rounded-lg bg-[var(--color-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)] border border-[var(--color-border)] shadow-xs hover:border-[var(--color-primary)] transition"
+          >
+            Review Orders →
           </Link>
         </div>
       ) : null}
 
-      <div className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-medium text-[var(--color-text)]">Closing count</p>
-          <p className="text-sm font-semibold tabular-nums text-[var(--color-text)]">{formatCents(floatTotal)}</p>
+      {/* Closing Cash Count */}
+      <div className="glass-panel rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-[var(--color-text)]">Closing count</p>
+            <p className="text-xs text-[var(--color-text-muted)]">Count physical drawer contents at end of shift</p>
+          </div>
+          <div className="text-right">
+            <span className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] font-medium">Counted total</span>
+            <p className="text-2xl font-bold font-mono tabular-nums text-[var(--color-text)]">
+              {formatCents(floatTotal)}
+            </p>
+          </div>
         </div>
+
+        {/* Quick Helper for Balanced Count */}
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-[var(--color-neutral-100)]/70 p-2 text-xs">
+          <span className="font-semibold text-[var(--color-neutral-600)] pl-1">⚡ Quick Count:</span>
+          <button
+            type="button"
+            onClick={() => setCounts(breakdownCentsToCounts(expected))}
+            className="rounded-lg bg-[var(--color-bg)] px-3 py-1 font-medium text-[var(--color-neutral-800)] shadow-xs border border-[var(--color-border)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+          >
+            Match Expected ({formatCents(expected)})
+          </button>
+          <button
+            type="button"
+            onClick={() => setCounts({})}
+            className="ml-auto rounded-lg px-2 py-1 text-[var(--color-neutral-500)] hover:text-[var(--color-danger)] transition"
+          >
+            Reset
+          </button>
+        </div>
+
         <FloatGrid values={counts} onChange={setCounts} />
-        <div className="mt-3 flex items-center justify-between border-t border-[var(--color-neutral-100)] pt-3">
+
+        <div className="mt-4 flex items-center justify-between border-t border-[var(--color-neutral-100)] pt-3">
           <p className="text-sm text-[var(--color-neutral-600)]">Variance (counted − expected)</p>
-          <p className={`text-sm font-semibold tabular-nums ${variance === 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
-            {formatCents(variance)}
+          <p className={`text-base font-bold font-mono tabular-nums ${variance === 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
+            {formatCents(variance)} {variance === 0 ? "✓ Balanced" : ""}
           </p>
         </div>
+
         {varianceNeedsNote ? (
-          <p className="mt-2 text-xs text-[var(--color-warning)]">
+          <p className="mt-2 text-xs text-[var(--color-warning)] font-medium">
             Variance over ₱100 — a manager note is required (UC-12).
           </p>
         ) : null}
       </div>
 
-      <div className="mt-4">
+      <div>
         <Input
           label={varianceNeedsNote ? "Manager note (required)" : "Note (optional)"}
           value={note}
@@ -305,7 +458,7 @@ export default function ShiftScreen(): JSX.Element {
         variant="primary"
         size="lg"
         full
-        className="mt-4"
+        className="mt-2 py-3.5 text-base font-semibold shadow-md glow-emerald"
         onClick={() => void doClose()}
         loading={busy}
         disabled={pending.length > 0 || (varianceNeedsNote && !note.trim())}

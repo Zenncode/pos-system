@@ -72,7 +72,7 @@ describe("Table — mutation killers", () => {
     const onRowClick = vi.fn();
     render(<Table<Row> columns={columns} data={data} rowKey={r => r.id} onRowClick={onRowClick} />);
     const row = screen.getByText("A").closest("tr");
-    fireEvent.keyDown(row, { key: "Enter" });
+    fireEvent.keyDown(row!, { key: "Enter" });
     expect(onRowClick).toHaveBeenCalledWith(data[0]);
   });
 

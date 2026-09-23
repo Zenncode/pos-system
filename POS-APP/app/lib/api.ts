@@ -29,6 +29,20 @@ function markDemo(v: boolean): void {
   }
 }
 
+export function isOffline(e: unknown): boolean {
+  if (e instanceof ApiError) {
+    return (
+      e.code === "NETWORK_OFFLINE" ||
+      e.code === "API_UNREACHABLE" ||
+      e.status === 502 ||
+      e.status === 503 ||
+      e.status === 504 ||
+      e.status === 0
+    );
+  }
+  return false;
+}
+
 function paginate<T>(rows: T[], page: number, pageSize: number): Paginated<T> {
   const start = (page - 1) * pageSize;
   return { data: rows.slice(start, start + pageSize), page, pageSize, total: rows.length };
@@ -46,7 +60,7 @@ export async function login(email: string, password: string): Promise<{ user: St
     markDemo(false);
     return { user: me };
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       // Demo login: any @example.com + password >= 4 chars
       if (email.endsWith("@example.com") && password.length >= 4) {
         setTokens("demo.access", "demo.refresh");
@@ -191,7 +205,7 @@ export async function getCurrentShift(): Promise<Shift | null> {
     markDemo(false);
     return normalizeShift(res);
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       markDemo(true);
       const s = loadDemoShift();
       return s && s.status === "OPEN" ? s : null;
@@ -207,7 +221,7 @@ export async function openShift(openingFloat: CashCount[], note?: string): Promi
     markDemo(false);
     return normalizeShift(s) as Shift;
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       markDemo(true);
       const existing = loadDemoShift();
       if (existing && existing.status === "OPEN") {
@@ -237,7 +251,7 @@ export async function closeShift(closingFloat: CashCount[], note?: string): Prom
     storeDemoShift(null);
     return normalizeShift(s) as Shift;
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       markDemo(true);
       const existing = loadDemoShift();
       if (!existing || existing.status !== "OPEN") {
@@ -265,7 +279,7 @@ export async function listCategories(): Promise<Category[]> {
     markDemo(false);
     return Array.isArray(res) ? res : res.data;
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       markDemo(true);
       return DEMO_CATEGORIES;
     }
@@ -292,7 +306,7 @@ export async function listProducts(q: ProductQuery = {}): Promise<Paginated<Prod
     markDemo(false);
     return res;
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       markDemo(true);
       let rows = [...DEMO_PRODUCTS];
       if (q.categoryId) rows = rows.filter((p) => p.categoryId === q.categoryId);
@@ -315,7 +329,7 @@ export async function lookupBarcode(code: string): Promise<Product | null> {
   try {
     return await http.get<Product>(`/api/products/barcode/${encodeURIComponent(code)}`);
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       return DEMO_PRODUCTS.find((p) => p.barcode === code || p.sku === code) ?? null;
     }
     throw e;
@@ -380,7 +394,7 @@ export async function checkout(
     markDemo(false);
     return res;
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       // Offline checkout — build a local order so the register never blocks
       markDemo(true);
       const lines = input.items.map((it, i) => {
@@ -456,7 +470,7 @@ export async function listOrders(params: {
     markDemo(false);
     return res;
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       markDemo(true);
       let rows = [...DEMO_ORDERS];
       if (params.status) rows = rows.filter((o) => o.status === params.status);
@@ -484,7 +498,7 @@ export async function getOrder(id: string): Promise<Order> {
   try {
     return await http.get<Order>(`/api/orders/${id}`);
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       const found = DEMO_ORDERS.find((o) => o.id === id);
       if (found) return found;
     }
@@ -507,7 +521,7 @@ export async function listCustomers(q?: string): Promise<Paginated<Customer>> {
     markDemo(false);
     return res;
   } catch (e) {
-    if (e instanceof ApiError && e.code === "NETWORK_OFFLINE") {
+    if (isOffline(e)) {
       markDemo(true);
       let rows = [...DEMO_CUSTOMERS];
       if (q) {
@@ -538,7 +552,7 @@ export async function getDailyReport(date: string): Promise<DailyReport> {
       lowStock: r.lowStock ?? [],
     };
   } catch (e) {
-    if (e instanceof ApiError && (e.code === "NETWORK_OFFLINE" || e.status === 403)) {
+    if (isOffline(e) || (e instanceof ApiError && e.status === 403)) {
       markDemo(true);
       const total = DEMO_ORDERS.filter((o) => o.status === "PAID").reduce((s, o) => s + o.totalCents, 0);
       return {

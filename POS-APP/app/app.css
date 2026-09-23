@@ -17,6 +17,8 @@ body {
   background: var(--color-surface);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 /* Tabular numerals for all money */
@@ -26,31 +28,60 @@ dd.tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* Thin scrollbars — content is the interface */
+/* Sleek modern scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 8px;
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Press feedback on product tiles */
-button:active {
-  transition: transform 150ms ease;
+/* Glassmorphism and modern surfaces */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  transition: box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease;
+}
+
+.glass-card:hover {
+  box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 6px -2px rgb(0 0 0 / 0.05);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.35);
+}
+
+/* Micro-animations and interactive feedback */
+button {
+  transition: all 140ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 /* Focus visibility for keyboard cashiers */
 :focus-visible {
-  outline: 2px solid var(--color-primary-focus);
-  outline-offset: 1px;
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
 }
 
-/* Register refresh — sell-screen helpers (monochrome + emerald, 8pt grid) */
+/* Register helpers */
 .kbd {
   display: inline-flex;
   align-items: center;
@@ -58,24 +89,29 @@ button:active {
   border-bottom-width: 2px;
   border-radius: 6px;
   background: var(--color-surface);
-  padding: 0 6px;
+  padding: 1px 6px;
   font-size: 11px;
   font-weight: 600;
   line-height: 18px;
-  color: var(--color-text);
+  color: var(--color-text-muted);
+  box-shadow: 0 1px 1px 0 rgba(0,0,0,0.05);
 }
 .pos-tile {
-  transition: border-color 150ms ease, transform 150ms ease;
+  transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pos-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.09);
 }
 .pos-tile:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 @keyframes pos-rise {
-  from { transform: translateY(10px); opacity: 0.4; }
+  from { transform: translateY(8px); opacity: 0.5; }
   to { transform: translateY(0); opacity: 1; }
 }
 .pos-sheet {
-  animation: pos-rise 160ms ease-out;
+  animation: pos-rise 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 @media (prefers-reduced-motion: reduce) {
   .pos-sheet { animation: none; }
