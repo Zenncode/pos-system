@@ -24,12 +24,12 @@ describe("Table — mutation killers", () => {
   // Kills: sort indicator shows asc/desc
   it("shows asc indicator when sortBy matches and sortDir=asc", () => {
     render(<Table<Row> columns={columns} data={data} rowKey={r => r.id} sortBy="value" sortDir="asc" onSort={vi.fn()} />);
-    expect(screen.getByText("↑")).toBeInTheDocument();
+    expect(screen.getByTestId("sort-asc")).toBeInTheDocument();
   });
 
   it("shows desc indicator when sortBy matches and sortDir=desc", () => {
     render(<Table<Row> columns={columns} data={data} rowKey={r => r.id} sortBy="value" sortDir="desc" onSort={vi.fn()} />);
-    expect(screen.getByText("↓")).toBeInTheDocument();
+    expect(screen.getByTestId("sort-desc")).toBeInTheDocument();
   });
 
   // Kills: onSort called with correct key
@@ -177,7 +177,7 @@ describe("Table — mutation killers", () => {
   // Kills: default sortDir=asc + desc aria-sort on the active header
   it("defaults to ascending indicator when sortDir omitted", () => {
     render(<Table<Row> columns={columns} data={data} rowKey={r => r.id} sortBy="value" onSort={vi.fn()} />);
-    expect(screen.getByText("↑")).toBeInTheDocument();
+    expect(screen.getByTestId("sort-asc")).toBeInTheDocument();
   });
 
   it("exposes descending aria-sort on the active sortable header", () => {
@@ -207,8 +207,8 @@ describe("Table — mutation killers", () => {
   // Kills: sort indicator must be absent without an active sort
   it("shows no sort indicator when sortBy is absent", () => {
     render(<Table<Row> columns={columns} data={data} rowKey={r => r.id} onSort={vi.fn()} />);
-    expect(screen.queryByText("↑")).toBeNull();
-    expect(screen.queryByText("↓")).toBeNull();
+    expect(screen.queryByTestId("sort-asc")).toBeNull();
+    expect(screen.queryByTestId("sort-desc")).toBeNull();
   });
 
   // Kills: row affordance classes with/without onRowClick

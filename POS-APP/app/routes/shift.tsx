@@ -80,10 +80,23 @@ function breakdownCentsToCounts(cents: number): Record<number, number> {
 }
 
 const DEVICE_LABELS = [
-  { key: "scanner", label: "Barcode scanner", icon: "📟" },
-  { key: "printer", label: "Receipt printer", icon: "🖨️" },
-  { key: "reader", label: "Card / QR reader", icon: "💳" },
+  { key: "scanner", label: "Barcode scanner" },
+  { key: "printer", label: "Receipt printer" },
+  { key: "reader", label: "Card / QR reader" },
 ] as const;
+
+function DeviceIcon({ device }: { device: string }): JSX.Element {
+  const paths: Record<string, JSX.Element> = {
+    scanner: <path strokeLinecap="round" strokeLinejoin="round" d="M3 7V5a2 2 0 012-2h2m14 0h2a2 2 0 012 2v2m0 12v2a2 2 0 01-2 2h-2M5 21H3a2 2 0 01-2-2v-2m18 0H5m0 0V7h14v10H5z" />,
+    printer: <path strokeLinecap="round" strokeLinejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-12-3h12v6H6v-6z" />,
+    reader: <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h2m4 0h2M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />,
+  };
+  return (
+    <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      {paths[device] ?? paths["reader"]}
+    </svg>
+  );
+}
 
 export default function ShiftScreen(): JSX.Element {
   const { shift, loading, error, refresh, open, close } = useShift();
@@ -210,14 +223,14 @@ export default function ShiftScreen(): JSX.Element {
               Count the drawer float before your first sale. Sales are blocked until a shift is open.
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 border border-amber-500/20">
-            <span className="h-2 w-2 rounded-full bg-amber-500" />
+          <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-[var(--color-warning)] bg-[var(--color-bg)] px-3 py-1 text-xs font-semibold text-[var(--color-text)]">
+            <span className="h-2 w-2 rounded-full bg-[var(--color-warning)]" />
             Shift Closed
           </span>
         </div>
 
         {/* Float Count Card */}
-        <div className="glass-panel rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-[var(--color-text)]">Opening float</p>
@@ -232,26 +245,26 @@ export default function ShiftScreen(): JSX.Element {
           </div>
 
           {/* Quick Presets */}
-          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-[var(--color-neutral-100)]/70 p-2 text-xs">
-            <span className="font-semibold text-[var(--color-neutral-600)] pl-1">⚡ Quick Float:</span>
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-[var(--color-surface)] p-2 text-xs">
+            <span className="font-semibold text-[var(--color-text-muted)] pl-1">Quick float:</span>
             <button
               type="button"
               onClick={() => setCounts({ 50000: 1, 20000: 2, 10000: 1 })}
-              className="rounded-lg bg-[var(--color-bg)] px-3 py-1 font-medium text-[var(--color-neutral-800)] shadow-xs border border-[var(--color-border)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+              className="rounded-lg bg-[var(--color-bg)] px-3 py-1 font-medium tabular-nums text-[var(--color-text)] shadow-xs border border-[var(--color-border)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
             >
               ₱1,000 Float
             </button>
             <button
               type="button"
               onClick={() => setCounts({ 100000: 1, 50000: 1, 20000: 2, 10000: 1 })}
-              className="rounded-lg bg-[var(--color-bg)] px-3 py-1 font-medium text-[var(--color-neutral-800)] shadow-xs border border-[var(--color-border)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+              className="rounded-lg bg-[var(--color-bg)] px-3 py-1 font-medium tabular-nums text-[var(--color-text)] shadow-xs border border-[var(--color-border)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
             >
               ₱2,000 Float
             </button>
             <button
               type="button"
               onClick={() => setCounts({})}
-              className="ml-auto rounded-lg px-2 py-1 text-[var(--color-neutral-500)] hover:text-[var(--color-danger)] transition"
+              className="ml-auto rounded-lg px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition"
             >
               Reset
             </button>
@@ -266,14 +279,14 @@ export default function ShiftScreen(): JSX.Element {
         </div>
 
         {/* Device Check Card */}
-        <div className="glass-panel rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm">
           {/* FR-08 */}
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-[var(--color-text)]">Hardware &amp; device check</p>
-              <p className="text-xs text-[var(--color-text-muted)]">Verify peripherals before starting shift</p>
+              <p className="text-sm font-semibold text-[var(--color-text)]">Hardware check</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Check devices before opening</p>
             </div>
-            <span className="text-xs text-[var(--color-text-muted)]">Click to toggle test status</span>
+            <span className="text-xs text-[var(--color-text-muted)]">Select to toggle test result</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {DEVICE_LABELS.map((d) => (
@@ -284,23 +297,23 @@ export default function ShiftScreen(): JSX.Element {
                 onClick={() => setDevices((prev) => ({ ...prev, [d.key]: !prev[d.key] }))}
                 className={`flex items-center justify-between gap-3 rounded-xl border p-3 text-left transition ${
                   devices[d.key]
-                    ? "border-emerald-500/40 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300 hover:border-emerald-500"
-                    : "border-rose-500/40 bg-rose-500/5 text-rose-800 dark:text-rose-300 hover:border-rose-500"
+                    ? "border-[var(--color-primary)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-primary-hover)]"
+                    : "border-[var(--color-danger)] bg-[var(--color-bg)] text-[var(--color-text)] hover:border-[var(--color-danger-hover)]"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">{d.icon}</span>
+                  <DeviceIcon device={d.key} />
                   <div>
                     <span className="text-xs font-semibold block">{d.label}</span>
                     <span className="text-[10px] text-[var(--color-text-muted)]">
-                      {devices[d.key] ? "Ready & connected" : "Hardware fault"}
+                      {devices[d.key] ? "Ready" : "Fault"}
                     </span>
                   </div>
                 </div>
                 <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                   devices[d.key]
-                    ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
-                    : "bg-rose-500/20 text-rose-700 dark:text-rose-300"
+                    ? "bg-[var(--color-surface-hover)] text-[var(--color-text)]"
+                    : "bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
                 }`}>
                   {devices[d.key] ? "OK" : "Fault"}
                 </span>
@@ -308,8 +321,8 @@ export default function ShiftScreen(): JSX.Element {
             ))}
           </div>
           {faulty.length > 0 ? (
-            <p className="mt-3 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5 text-xs text-amber-800 dark:text-amber-300">
-              ⚠️ Fault logged for: {faulty.map((f) => f.label).join(", ")}. You can still open and sell — faults appear in the Z-report.
+            <p className="mt-3 rounded-lg border border-[var(--color-warning)] bg-[var(--color-bg)] p-2.5 text-xs text-[var(--color-text)]">
+              Fault logged: {faulty.map((f) => f.label).join(", ")}. You can still open and sell.
             </p>
           ) : null}
         </div>
@@ -319,7 +332,7 @@ export default function ShiftScreen(): JSX.Element {
             label="Shift notes (optional)"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="e.g. drawer sealed, tape #123, morning opening notes"
+            placeholder="Drawer sealed, tape number, opening notes"
           />
         </div>
 
@@ -327,12 +340,12 @@ export default function ShiftScreen(): JSX.Element {
           variant="primary"
           size="lg"
           full
-          className="mt-2 py-3.5 text-base font-semibold shadow-md glow-emerald"
+          className="mt-2 py-3.5 text-base font-semibold"
           onClick={() => void doOpen()}
           loading={busy}
           disabled={floatTotal <= 0}
         >
-          Open shift &amp; start selling
+          Open shift
         </Button>
       </div>
     );
@@ -344,86 +357,86 @@ export default function ShiftScreen(): JSX.Element {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[var(--color-border)] pb-4">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-[var(--color-text)]">Close shift</h2>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-            Started {formatDateTime(openSince ?? "")} · {shiftOrders.length} orders · {formatCents(sales)} sales. Closing ends your session (FR-04).
+          <p className="mt-1 text-sm tabular-nums text-[var(--color-text-muted)]">
+            Started {formatDateTime(openSince ?? "")} · {shiftOrders.length} orders · {formatCents(sales)} sales.
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          Shift Active
+        <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-[var(--color-bg)] px-3 py-1 text-xs font-semibold text-[var(--color-text)] border border-[var(--color-border)]">
+          <span className="h-2 w-2 rounded-full bg-[var(--color-primary)] animate-pulse" />
+          Shift open
         </span>
       </div>
 
       {/* Financial KPI Cards */}
       <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-        <div className="glass-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
           <dt className="text-xs font-medium text-[var(--color-text-muted)]">Opening float</dt>
-          <dd className="mt-1.5 text-lg font-bold tabular-nums text-[var(--color-text)] font-mono">{formatCents(openingFloatCents)}</dd>
+          <dd className="money mt-1.5 text-lg font-bold tabular-nums text-[var(--color-text)] font-mono">{formatCents(openingFloatCents)}</dd>
         </div>
-        <div className="glass-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
           <dt className="text-xs font-medium text-[var(--color-text-muted)]">Shift sales</dt>
-          <dd className="mt-1.5 text-lg font-bold tabular-nums text-[var(--color-primary)] font-mono">{formatCents(sales)}</dd>
+          <dd className="money mt-1.5 text-lg font-bold tabular-nums text-[var(--color-primary)] font-mono">{formatCents(sales)}</dd>
         </div>
-        <div className="glass-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
           <dt className="text-xs font-medium text-[var(--color-text-muted)]">Expected cash</dt>
-          <dd className="mt-1.5 text-lg font-bold tabular-nums text-[var(--color-text)] font-mono">
+          <dd className="money mt-1.5 text-lg font-bold tabular-nums text-[var(--color-text)] font-mono">
             {ordersLoading ? "…" : formatCents(expected)}
           </dd>
         </div>
-        <div className="glass-card rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
           <dt className="text-xs font-medium text-[var(--color-text-muted)]">Variance</dt>
-          <dd className={`mt-1.5 text-lg font-bold tabular-nums font-mono ${variance === 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
+          <dd className={`money mt-1.5 text-lg font-bold tabular-nums font-mono ${variance === 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
             {formatCents(variance)}
           </dd>
         </div>
       </dl>
 
       {pending.length > 0 ? (
-        <div className="rounded-xl border border-[var(--color-warning)] bg-[var(--color-warning)]/10 p-4 text-sm text-[var(--color-text)] flex items-center justify-between">
+        <div className="rounded-xl border border-[var(--color-warning)] bg-[var(--color-bg)] p-4 text-sm text-[var(--color-text)] flex items-center justify-between">
           <div>
-            <span className="font-semibold text-amber-800 dark:text-amber-300">⚠️ Pending orders blocking close:</span>
+            <span className="font-semibold text-[var(--color-text)]">Pending orders block close:</span>
             <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
-              {pending.length} pending sale{pending.length > 1 ? "s" : ""} must be completed or voided before closing (FR-11).
+              {pending.length} pending sale{pending.length > 1 ? "s" : ""} must be completed or voided first.
             </p>
           </div>
           <Link
             to="/orders"
             className="rounded-lg bg-[var(--color-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)] border border-[var(--color-border)] shadow-xs hover:border-[var(--color-primary)] transition"
           >
-            Review Orders →
+            Review orders
           </Link>
         </div>
       ) : null}
 
       {/* Closing Cash Count */}
-      <div className="glass-panel rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-[var(--color-text)]">Closing count</p>
-            <p className="text-xs text-[var(--color-text-muted)]">Count physical drawer contents at end of shift</p>
+            <p className="text-xs text-[var(--color-text-muted)]">Count drawer contents at end of shift</p>
           </div>
           <div className="text-right">
             <span className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] font-medium">Counted total</span>
-            <p className="text-2xl font-bold font-mono tabular-nums text-[var(--color-text)]">
+            <p className="money text-2xl font-bold font-mono tabular-nums text-[var(--color-text)]">
               {formatCents(floatTotal)}
             </p>
           </div>
         </div>
 
         {/* Quick Helper for Balanced Count */}
-        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-[var(--color-neutral-100)]/70 p-2 text-xs">
-          <span className="font-semibold text-[var(--color-neutral-600)] pl-1">⚡ Quick Count:</span>
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-[var(--color-surface)] p-2 text-xs">
+          <span className="font-semibold text-[var(--color-text-muted)] pl-1">Quick count:</span>
           <button
             type="button"
             onClick={() => setCounts(breakdownCentsToCounts(expected))}
-            className="rounded-lg bg-[var(--color-bg)] px-3 py-1 font-medium text-[var(--color-neutral-800)] shadow-xs border border-[var(--color-border)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+            className="rounded-lg bg-[var(--color-bg)] px-3 py-1 font-medium tabular-nums text-[var(--color-text)] shadow-xs border border-[var(--color-border)] transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
           >
-            Match Expected ({formatCents(expected)})
+            Match expected ({formatCents(expected)})
           </button>
           <button
             type="button"
             onClick={() => setCounts({})}
-            className="ml-auto rounded-lg px-2 py-1 text-[var(--color-neutral-500)] hover:text-[var(--color-danger)] transition"
+            className="ml-auto rounded-lg px-2 py-1 text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition"
           >
             Reset
           </button>
@@ -431,16 +444,23 @@ export default function ShiftScreen(): JSX.Element {
 
         <FloatGrid values={counts} onChange={setCounts} />
 
-        <div className="mt-4 flex items-center justify-between border-t border-[var(--color-neutral-100)] pt-3">
-          <p className="text-sm text-[var(--color-neutral-600)]">Variance (counted − expected)</p>
-          <p className={`text-base font-bold font-mono tabular-nums ${variance === 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
-            {formatCents(variance)} {variance === 0 ? "✓ Balanced" : ""}
+        <div className="mt-4 flex items-center justify-between border-t border-[var(--color-border-subtle)] pt-3">
+          <p className="text-sm text-[var(--color-text-muted)]">Variance (counted minus expected)</p>
+          <p className={`money text-base font-bold font-mono tabular-nums ${variance === 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
+            {formatCents(variance)} {variance === 0 ? (
+              <span className="inline-flex items-center gap-1 font-semibold">
+                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Balanced
+              </span>
+            ) : ""}
           </p>
         </div>
 
         {varianceNeedsNote ? (
           <p className="mt-2 text-xs text-[var(--color-warning)] font-medium">
-            Variance over ₱100 — a manager note is required (UC-12).
+            Variance over ₱100 — a manager note is required.
           </p>
         ) : null}
       </div>
@@ -450,7 +470,7 @@ export default function ShiftScreen(): JSX.Element {
           label={varianceNeedsNote ? "Manager note (required)" : "Note (optional)"}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder={varianceNeedsNote ? "Explain the variance…" : "Anything to record"}
+          placeholder={varianceNeedsNote ? "Explain the variance" : "Shift note"}
         />
       </div>
 
@@ -458,12 +478,12 @@ export default function ShiftScreen(): JSX.Element {
         variant="primary"
         size="lg"
         full
-        className="mt-2 py-3.5 text-base font-semibold shadow-md glow-emerald"
+        className="mt-2 py-3.5 text-base font-semibold"
         onClick={() => void doClose()}
         loading={busy}
         disabled={pending.length > 0 || (varianceNeedsNote && !note.trim())}
       >
-        Close shift &amp; sign out
+        Close shift
       </Button>
     </div>
   );

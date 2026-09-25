@@ -1,20 +1,20 @@
 /* POS-APP/app/styles/tokens.css */
 :root {
   /* Color - Semantic */
-  --color-primary: #046c4e;
-  --color-primary-hover: #047857;
-  --color-primary-focus: #065f46;
-  --color-danger: #dc2626;
-  --color-danger-hover: #b91c1c;
-  --color-danger-focus: #991b1b;
-  --color-success: #059669;
-  --color-warning: #d97706;
-  --color-info: #0284c7;
+  --color-primary: #2f5d3a;
+  --color-primary-hover: #274e31;
+  --color-primary-focus: #1e422b;
+  --color-danger: #b3261e;
+  --color-danger-hover: #931d17;
+  --color-danger-focus: #7a1712;
+  --color-success: #2f7d4f;
+  --color-warning: #9a6200;
+  --color-info: #1d5f8a;
 
   /* Soft tints (toast borders etc.) — light */
-  --color-success-soft: #a7f3d0; /* emerald-200 */
-  --color-danger-soft: #fecaca;  /* red-200 */
-  --color-info-soft: #bae6fd;    /* sky-200 */
+  --color-success-soft: #cfe3d4;
+  --color-danger-soft: #f3c9c5;
+  --color-info-soft: #c3d9e6;
 
   /* Color - Neutral scale */
   --color-neutral-950: #020617;
@@ -43,11 +43,7 @@
   --color-text-inverse: #ffffff;
   --color-overlay: rgba(15, 23, 42, 0.5);
 
-  /* Glassmorphism & Elevation */
-  --glass-bg: rgba(255, 255, 255, 0.82);
-  --glass-border: rgba(226, 232, 240, 0.7);
-  --glass-dark-bg: rgba(15, 23, 42, 0.92);
-  --glass-dark-border: rgba(51, 65, 85, 0.6);
+  /* Flat elevation — hairline borders only, no blur or glow */
 
   /* Border radius */
   --radius-sm: 6px;
@@ -62,7 +58,6 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
-  --shadow-glow: 0 0 25px -4px rgba(16, 185, 129, 0.28);
 
   /* Spacing (4px base) */
   --space-1: 4px;
@@ -77,8 +72,8 @@
   --space-16: 64px;
 
   /* Typography */
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
 
   --text-xs: 0.75rem;    /* 12px */
   --text-sm: 0.8125rem;  /* 13px */

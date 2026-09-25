@@ -4,17 +4,17 @@ import type { OrderStatus } from "~/types";
 // Minimal dot badges — status is carried by a small colored dot + label.
 // No pill backgrounds or borders; text stays neutral so dense tables scan clean.
 const dots: Record<string, string> = {
-  PAID: "bg-emerald-600",
-  PENDING: "bg-amber-500",
-  VOID: "bg-gray-400",
-  REFUNDED: "bg-gray-500",
-  LOW: "bg-red-600",
-  OK: "bg-emerald-600",
-  MUTED: "bg-gray-400",
-  CASH: "bg-emerald-600",
-  CARD: "bg-gray-500",
-  QR: "bg-gray-500",
-  WALLET: "bg-gray-500",
+  PAID: "bg-[var(--color-primary)]",
+  PENDING: "bg-[var(--color-warning)]",
+  VOID: "bg-[var(--color-neutral-400)]",
+  REFUNDED: "bg-[var(--color-neutral-500)]",
+  LOW: "bg-[var(--color-danger)]",
+  OK: "bg-[var(--color-primary)]",
+  MUTED: "bg-[var(--color-neutral-400)]",
+  CASH: "bg-[var(--color-primary)]",
+  CARD: "bg-[var(--color-neutral-500)]",
+  QR: "bg-[var(--color-neutral-500)]",
+  WALLET: "bg-[var(--color-neutral-500)]",
 };
 
 export function Badge({ tone, children }: { tone: OrderStatus | string; children: ReactNode }): JSX.Element {

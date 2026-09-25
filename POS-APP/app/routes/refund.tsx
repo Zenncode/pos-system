@@ -115,7 +115,7 @@ export default function Refund(): JSX.Element {
       ) : listError ? (
         <EmptyState title={listError} action={<Button onClick={() => setQ((v) => v)}>Retry</Button>} />
       ) : orders.length === 0 ? (
-        <EmptyState title="No paid orders found. Voided orders stay in Orders →." />
+        <EmptyState title="No paid orders found. Voided orders stay in Orders." />
       ) : (
         <ul className="mb-6 divide-y divide-[var(--color-border)] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]">
           {orders.map((o) => (
