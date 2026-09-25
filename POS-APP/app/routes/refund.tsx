@@ -19,7 +19,7 @@ function canRefund(role: Role | undefined): boolean {
 }
 
 export default function Refund(): JSX.Element {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { push } = useToast();
   const navigate = useNavigate();
 
@@ -35,8 +35,8 @@ export default function Refund(): JSX.Element {
   const allowed = canRefund(user?.role);
 
   useEffect(() => {
-    if (!allowed) push("error", "Manager access required.");
-  }, [allowed, push]);
+    if (!authLoading && !allowed) push("error", "Manager access required.");
+  }, [authLoading, allowed, push]);
 
   useEffect(() => {
     let alive = true;
@@ -57,6 +57,8 @@ export default function Refund(): JSX.Element {
       alive = false;
     };
   }, [q, allowed]);
+
+  if (authLoading) return <></>;
 
   if (!allowed) return <Navigate to="/orders" replace />;
 
