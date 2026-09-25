@@ -51,7 +51,11 @@ export function CartLine({ line, onInc, onDec, onSetQty, onRemove }: Props): JSX
         <p className="text-xs text-[var(--color-text-muted)]">{formatCents(line.product.priceCents)} each</p>
       </div>
       <span className="text-sm font-medium tabular-nums text-[var(--color-text)]">{formatCents(line.product.priceCents * line.qty)}</span>
-      <Button variant="ghost" size="sm" onClick={() => onRemove(line.product.id)} aria-label={`Remove ${line.product.name}`} className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)]">✕</Button>
+      <Button variant="ghost" size="sm" onClick={() => onRemove(line.product.id)} aria-label={`Remove ${line.product.name}`} className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)]">
+        <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </Button>
     </li>
   );
 }

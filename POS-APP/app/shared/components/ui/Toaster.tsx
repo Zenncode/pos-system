@@ -15,7 +15,11 @@ export function Toaster(): JSX.Element {
           role="alert"
         >
           <span className="flex-1 text-sm text-[var(--color-text)]">{t.message}</span>
-          <Button variant="ghost" size="sm" onClick={() => remove(t.id)} aria-label="Dismiss">✕</Button>
+          <Button variant="ghost" size="sm" onClick={() => remove(t.id)} aria-label="Dismiss">
+            <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </Button>
         </div>
       ))}
     </div>

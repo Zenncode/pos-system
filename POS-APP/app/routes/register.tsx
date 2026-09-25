@@ -54,12 +54,12 @@ export default function Register(): JSX.Element {
   useSocket({
     storeId: storeId ?? undefined,
     onStockLow: (data) => {
-      push("warning", `⚠️ Low stock: ${data.productName} (${data.currentStock} left)`);
+      push("warning", `Low stock: ${data.productName} (${data.currentStock} left)`);
       void load(); // refresh product list
     },
     onOrderCreated: (data) => {
       if (data.itemCount > 0) {
-        push("info", `📦 New order: ${data.orderNumber} (${data.itemCount} items)`);
+        push("info", `New order: ${data.orderNumber} (${data.itemCount} items)`);
       }
     },
     onSessionRevoked: () => {
@@ -284,7 +284,7 @@ export default function Register(): JSX.Element {
       push(
         "success",
         res.demo
-          ? `Receipt queued locally (demo) — ${channel.toLowerCase()} → ${target}`
+          ? `Receipt queued locally (demo) — ${channel.toLowerCase()} to ${target}`
           : `${channel === "EMAIL" ? "Email" : "SMS"} receipt sent to ${target}`,
       );
     } catch (e) {
@@ -417,10 +417,10 @@ export default function Register(): JSX.Element {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-slate-50 lg:flex-row">
+    <div className="flex h-full min-h-0 flex-col bg-[var(--color-surface)] lg:flex-row">
       {/* Catalog/Cart view switch — narrow viewports only; both panes stay
           mounted so cart state, shortcuts and persistence are untouched. */}
-      <div className="flex shrink-0 gap-2 border-b border-slate-200/90 bg-white p-2 lg:hidden" role="group" aria-label="Register view">
+      <div className="flex shrink-0 gap-2 border-b border-[var(--color-border)] bg-[var(--color-bg)] p-2 lg:hidden" role="group" aria-label="Register view">
         {(["catalog", "cart"] as const).map((v) => (
           <button
             key={v}
@@ -429,13 +429,13 @@ export default function Register(): JSX.Element {
             onClick={() => setMobileView(v)}
             className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg border px-3 text-sm font-medium ${
               mobileView === v
-                ? "border-[var(--color-primary)] bg-[var(--color-success)]/10 text-[var(--color-success)]"
-                : "border-[var(--color-border)] text-[var(--color-neutral-700)]"
+                ? "border-[var(--color-primary)] bg-[var(--color-bg)] text-[var(--color-text)]"
+                : "border-[var(--color-border)] text-[var(--color-text-muted)]"
             }`}
           >
             {v === "catalog" ? "Catalog" : "Cart"}
             {v === "cart" && cartCount > 0 && (
-              <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-bold tabular-nums text-white" aria-label={`${cartCount} items in cart`}>
+              <span className="rounded-full bg-[var(--color-primary)] px-2 py-0.5 text-[11px] font-bold tabular-nums text-white" aria-label={`${cartCount} items in cart`}>
                 {cartCount}
               </span>
             )}
@@ -444,12 +444,12 @@ export default function Register(): JSX.Element {
       </div>
 
       {/* Left rail — fixed 240px vertical list on xl+ only */}
-      <div className="hidden w-[240px] shrink-0 flex-col border-r border-slate-200/90 bg-white xl:flex">
-        <div className="p-3 border-b border-slate-100">
+      <div className="hidden w-[240px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg)] xl:flex">
+        <div className="p-3 border-b border-[var(--color-border-subtle)]">
           <div className="relative">
             <Input
               ref={searchRef}
-              placeholder="Search SKU or scan… (F2)"
+              placeholder="Search SKU or scan (F2)"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -464,10 +464,12 @@ export default function Register(): JSX.Element {
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="absolute right-1 top-1/2 flex min-h-10 min-w-10 -translate-y-1/2 items-center justify-center text-slate-400 hover:text-slate-600"
+                className="absolute right-1 top-1/2 flex min-h-10 min-w-10 -translate-y-1/2 items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                 aria-label="Clear search"
               >
-                ✕
+                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             )}
           </div>
@@ -479,12 +481,12 @@ export default function Register(): JSX.Element {
             aria-current={catId === "" ? "true" : undefined}
             className={`flex min-h-10 w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium ${
               catId === ""
-                ? "bg-emerald-50 text-emerald-900 font-semibold"
-                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                ? "bg-[var(--color-surface-hover)] text-[var(--color-text)] font-semibold"
+                : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
             }`}
           >
             <span>All items</span>
-            <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500 font-mono">
+            <span className="rounded-full bg-[var(--color-surface-hover)] px-1.5 py-0.5 text-[10px] tabular-nums text-[var(--color-text-muted)] font-mono">
               {products.length}
             </span>
           </button>
@@ -496,8 +498,8 @@ export default function Register(): JSX.Element {
               aria-current={catId === c.id ? "true" : undefined}
               className={`flex min-h-10 w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium ${
                 catId === c.id
-                  ? "bg-emerald-50 text-emerald-900 font-semibold"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-[var(--color-surface-hover)] text-[var(--color-text)] font-semibold"
+                  : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
               }`}
             >
               <span className="truncate">{c.name}</span>
@@ -507,12 +509,12 @@ export default function Register(): JSX.Element {
       </div>
 
       {/* Compact category selector — search + horizontal chips below xl */}
-      <div className="shrink-0 border-b border-slate-200/90 bg-white xl:hidden">
+      <div className="shrink-0 border-b border-[var(--color-border)] bg-[var(--color-bg)] xl:hidden">
         <div className="p-2">
           <div className="relative">
             <Input
               ref={compactSearchRef}
-              placeholder="Search SKU or scan… (F2)"
+              placeholder="Search SKU or scan (F2)"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -527,10 +529,12 @@ export default function Register(): JSX.Element {
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="absolute right-1 top-1/2 flex min-h-10 min-w-10 -translate-y-1/2 items-center justify-center text-slate-400 hover:text-slate-600"
+                className="absolute right-1 top-1/2 flex min-h-10 min-w-10 -translate-y-1/2 items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                 aria-label="Clear search"
               >
-                ✕
+                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             )}
           </div>
@@ -542,8 +546,8 @@ export default function Register(): JSX.Element {
             aria-current={catId === "" ? "true" : undefined}
             className={`min-h-10 shrink-0 rounded-full border px-3 text-xs font-medium ${
               catId === ""
-                ? "border-emerald-600 bg-emerald-50 text-emerald-900 font-semibold"
-                : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                ? "border-[var(--color-primary)] bg-[var(--color-bg)] text-[var(--color-text)] font-semibold"
+                : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"
             }`}
           >
             All items
@@ -556,8 +560,8 @@ export default function Register(): JSX.Element {
               aria-current={catId === c.id ? "true" : undefined}
               className={`min-h-10 shrink-0 rounded-full border px-3 text-xs font-medium ${
                 catId === c.id
-                  ? "border-emerald-600 bg-emerald-50 text-emerald-900 font-semibold"
-                  : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                  ? "border-[var(--color-primary)] bg-[var(--color-bg)] text-[var(--color-text)] font-semibold"
+                  : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"
               }`}
             >
               {c.name}
@@ -572,34 +576,32 @@ export default function Register(): JSX.Element {
           <Spinner />
         ) : !shiftOpen ? (
           <div className="flex h-full flex-col items-center justify-center p-8 text-center">
-            <div className="max-w-md w-full rounded-2xl border border-slate-200/90 bg-white p-8 shadow-sm">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-8 ring-amber-50/60 mb-4">
-                <svg className="size-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="max-w-md w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-6">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] mb-4">
+                <svg className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-slate-900">Shift is Currently Closed</h3>
-              <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                To start ringing up sales and track cash drawer balances, open a shift drawer with an initial cash float.
+              <h3 className="text-base font-bold text-[var(--color-text)]">Shift closed</h3>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--color-text-muted)]">
+                Open a shift with a cash float to start selling.
               </p>
-              <div className="mt-6 flex flex-col gap-2.5">
+              <div className="mt-5 flex flex-col gap-2">
                 <Button
                   variant="primary"
                   size="lg"
                   full
                   onClick={() => void quickOpenShift()}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm"
                 >
-                  ⚡ Quick Open (₱1,000.00 Float)
+                  Quick open (P1,000 float)
                 </Button>
                 <Button
                   variant="secondary"
                   size="md"
                   full
                   onClick={() => navigate("/shift")}
-                  className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs"
                 >
-                  Count Custom Cash Float & Open Drawer →
+                  Count float and open
                 </Button>
               </div>
             </div>
@@ -678,29 +680,31 @@ export default function Register(): JSX.Element {
 
 <div className="border-t border-[var(--color-border)] p-4">
           {pendingSync && (
-            <div className="mb-3 flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 p-2 text-sm text-amber-800" role="status" aria-live="polite">
-              <span className="flex size-4 items-center justify-center rounded-full bg-amber-500 text-white text-xs">⟳</span>
+            <div className="mb-3 flex items-center gap-2 rounded-lg border border-[var(--color-warning)] bg-[var(--color-bg)] p-2 text-sm text-[var(--color-text)]" role="status" aria-live="polite">
+              <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v6h6M20 20v-6h-6M20 9a8 8 0 00-14-3M4 15a8 8 0 0014 3" />
+              </svg>
               <span>Pending sync — order saved offline</span>
             </div>
           )}
-          <dl className="space-y-1.5 text-xs text-slate-600 tabular-nums">
+          <dl className="money space-y-1.5 text-xs tabular-nums text-[var(--color-text-muted)]">
             <div className="flex justify-between">
-              <dt className="text-slate-500 font-medium">Subtotal</dt>
-              <dd className="font-semibold text-slate-800">{formatCents(totals.subtotalCents)}</dd>
+              <dt className="font-medium">Subtotal</dt>
+              <dd className="font-semibold tabular-nums text-[var(--color-text)]">{formatCents(totals.subtotalCents)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-slate-500 font-medium">Tax</dt>
-              <dd className="font-semibold text-slate-800">{formatCents(totals.taxCents)}</dd>
+              <dt className="font-medium">Tax</dt>
+              <dd className="font-semibold tabular-nums text-[var(--color-text)]">{formatCents(totals.taxCents)}</dd>
             </div>
             {totals.discountCents > 0 && (
-              <div className="flex justify-between text-rose-600 font-semibold">
+              <div className="flex justify-between font-semibold text-[var(--color-danger)]">
                 <dt className="font-medium">Discount</dt>
-                <dd>−{formatCents(totals.discountCents)}</dd>
+                <dd className="tabular-nums">−{formatCents(totals.discountCents)}</dd>
               </div>
             )}
-            <div className="flex items-baseline justify-between border-t border-slate-200/80 pt-2 text-sm font-bold">
-              <dt className="text-slate-900 font-bold text-sm">Total Due</dt>
-              <dd className="text-2xl font-black text-emerald-600 tabular-nums" aria-live="polite">{formatCents(totals.totalCents)}</dd>
+            <div className="flex items-baseline justify-between border-t border-[var(--color-border)] pt-2 text-sm font-bold">
+              <dt className="font-bold text-sm text-[var(--color-text)]">Total</dt>
+              <dd className="pos-total text-2xl text-[var(--color-text)] tabular-nums" aria-live="polite">{formatCents(totals.totalCents)}</dd>
             </div>
           </dl>
           <div className="mt-4">
@@ -714,17 +718,17 @@ export default function Register(): JSX.Element {
                 setPayOpen(true);
               }}
               disabled={lines.length === 0 || !shiftOpen}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base py-3.5 shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+              className="font-bold text-base py-3.5 flex items-center justify-center gap-2"
             >
-              <span>Charge {formatCents(totals.totalCents)}</span>
-              <kbd className="rounded bg-emerald-700/80 px-2 py-0.5 text-xs font-mono font-normal text-emerald-100">F8</kbd>
+              <span className="tabular-nums">Charge {formatCents(totals.totalCents)}</span>
+              <kbd className="rounded bg-white/20 px-2 py-0.5 text-xs font-mono font-normal text-white">F8</kbd>
             </Button>
           </div>
           {/* Quick Shortcuts Bar */}
-          <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400 font-medium px-1">
-            <span><kbd className="font-mono text-[9px] bg-slate-200/80 px-1 py-0.5 rounded text-slate-600">F2</kbd> Search</span>
-            <span><kbd className="font-mono text-[9px] bg-slate-200/80 px-1 py-0.5 rounded text-slate-600">F4</kbd> Disc</span>
-            <span><kbd className="font-mono text-[9px] bg-slate-200/80 px-1 py-0.5 rounded text-slate-600">F8</kbd> Pay</span>
+          <div className="mt-3 flex items-center justify-between text-[10px] font-medium px-1 text-[var(--color-text-muted)]">
+            <span><kbd className="font-mono text-[9px] bg-[var(--color-surface-hover)] px-1 py-0.5 rounded text-[var(--color-text-muted)]">F2</kbd> Search</span>
+            <span><kbd className="font-mono text-[9px] bg-[var(--color-surface-hover)] px-1 py-0.5 rounded text-[var(--color-text-muted)]">F4</kbd> Disc</span>
+            <span><kbd className="font-mono text-[9px] bg-[var(--color-surface-hover)] px-1 py-0.5 rounded text-[var(--color-text-muted)]">F8</kbd> Pay</span>
           </div>
         </div>
       </div>
@@ -764,7 +768,7 @@ export default function Register(): JSX.Element {
                 type="button"
                 aria-pressed={payTab === m}
                 onClick={() => setPayTab(m)}
-                className={`min-h-10 flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${payTab === m ? "border-[var(--color-primary)] bg-[var(--color-success)]/10 text-[var(--color-success)]" : "border-[var(--color-border)] text-[var(--color-neutral-700)] hover:bg-[var(--color-surface)]"}`}
+                className={`min-h-10 flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${payTab === m ? "border-[var(--color-primary)] bg-[var(--color-bg)] text-[var(--color-text)]" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}
               >
                 {m}
               </button>
@@ -774,9 +778,9 @@ export default function Register(): JSX.Element {
           {payTab === "CASH" ? (
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Cash Received</label>
+                <label className="mb-1 block text-xs font-semibold text-[var(--color-text)]">Cash received</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₱</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--color-text-muted)]">₱</span>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -784,7 +788,7 @@ export default function Register(): JSX.Element {
                     onChange={(e) => setTendered(e.target.value)}
                     placeholder="0.00"
                     autoFocus
-                    className="h-11 w-full rounded-xl border border-slate-300 pl-8 pr-3 text-lg font-mono font-bold text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    className="h-11 w-full rounded-lg border border-[var(--color-border)] pl-8 pr-3 text-lg font-mono font-bold tabular-nums text-[var(--color-text)] focus:border-[var(--color-border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20"
                   />
                 </div>
               </div>
@@ -796,7 +800,7 @@ export default function Register(): JSX.Element {
                     key={c}
                     type="button"
                     onClick={() => setTendered(c === 0 ? (chargeTotal / 100).toFixed(2) : (c / 100).toFixed(2))}
-                    className="flex min-h-10 flex-1 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 py-2 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-800"
+                    className="flex min-h-10 flex-1 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2 text-xs font-semibold tabular-nums text-[var(--color-text)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
                   >
                     {c === 0 ? "Exact" : formatCents(c)}
                   </button>
@@ -815,10 +819,10 @@ export default function Register(): JSX.Element {
                       else if (k === "." && tendered.includes(".")) return;
                       else setTendered((prev) => prev + k);
                     }}
-                    className={`min-h-10 rounded-lg py-2.5 text-sm font-semibold ${
+                    className={`min-h-10 rounded-lg py-2.5 text-sm font-semibold tabular-nums ${
                       k === "C"
-                        ? "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
-                        : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-300"
+                        ? "border border-[var(--color-danger)] bg-[var(--color-bg)] text-[var(--color-danger)] hover:bg-[var(--color-surface-hover)]"
+                        : "border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] hover:border-[var(--color-neutral-300)]"
                     }`}
                   >
                     {k}
@@ -828,18 +832,18 @@ export default function Register(): JSX.Element {
 
               {/* Change due / Remaining Banner — fresh charge total, same basis as canCharge/doCharge */}
               {cash.covered ? (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 p-3 text-center">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
-                    Change Due to Customer
+                <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-center">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                    Change due
                   </span>
-                  <p className="text-2xl font-black text-emerald-600 tabular-nums">
+                  <p className="pos-total text-2xl text-[var(--color-text)] tabular-nums">
                     {formatCents(cash.changeCents)}
                   </p>
                 </div>
               ) : (
-                <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-center">
-                  <span className="text-xs font-medium text-amber-800">
-                    Remaining to Pay: <strong className="font-bold">{formatCents(cash.remainingCents)}</strong>
+                <div className="rounded-lg border border-[var(--color-warning)] bg-[var(--color-bg)] p-2.5 text-center">
+                  <span className="text-xs font-medium text-[var(--color-text)]">
+                    Remaining: <strong className="font-bold tabular-nums">{formatCents(cash.remainingCents)}</strong>
                   </span>
                 </div>
               )}
@@ -872,7 +876,9 @@ export default function Register(): JSX.Element {
                       className="flex min-h-10 min-w-10 shrink-0 items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-danger)]"
                       aria-label={`Remove tender ${i + 1}`}
                     >
-                      ✕
+                      <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                     </button>
                   )}
                 </div>
@@ -915,10 +921,14 @@ export default function Register(): JSX.Element {
       {receipt ? (
         <Modal title="Receipt" onClose={() => setReceipt(null)}>
           <div className="receipt-print text-center">
-            <span className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-[var(--color-success)]/10 text-xl text-[var(--color-success)]">✓</span>
+            <span className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-[var(--color-surface-hover)] text-[var(--color-primary)]">
+              <svg className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
             <p className="text-sm tabular-nums text-[var(--color-text-muted)]">{receipt.orderNumber}</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--color-text)]">{formatCents(receipt.totalCents)}</p>
-            <p className="mt-1 text-sm tabular-nums text-[var(--color-success)] font-semibold">{formatCents(receipt.changeCents)}</p>
+            <p className="pos-total mt-1 text-2xl tabular-nums text-[var(--color-text)]">{formatCents(receipt.totalCents)}</p>
+            <p className="money mt-1 text-sm tabular-nums text-[var(--color-text-muted)] font-semibold">Change {formatCents(receipt.changeCents)}</p>
           </div>
           <div className="no-print mt-3 p-3">
             <div className="flex gap-2">
@@ -930,10 +940,14 @@ export default function Register(): JSX.Element {
                 aria-label="Receipt destination"
               />
               <Button size="sm" variant="secondary" onClick={() => void deliver("EMAIL")} disabled={delivBusy !== null} aria-label="Email receipt">
-                ✉
+                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.9 5.3a2 2 0 002.2 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
               </Button>
               <Button size="sm" variant="secondary" onClick={() => void deliver("SMS")} disabled={delivBusy !== null} aria-label="SMS receipt">
-                📱
+                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h8m-8 4h5M21 12a9 9 0 01-13.2 8L3 21l1.1-4.4A9 9 0 1121 12z" />
+                </svg>
               </Button>
             </div>
           </div>

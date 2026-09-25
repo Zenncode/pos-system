@@ -177,7 +177,7 @@ export default function StaffManagement(): JSX.Element {
   const emptyState = (
     <EmptyState
       title="No staff users yet"
-      action={<Button variant="primary" onClick={() => openAddModal()}>Add First User →</Button>}
+      action={<Button variant="primary" onClick={() => openAddModal()}>Add first user</Button>}
     />
   );
 

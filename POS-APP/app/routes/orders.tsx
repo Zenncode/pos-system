@@ -254,7 +254,7 @@ export default function Orders(): JSX.Element {
           {loading ? (
             <Spinner />
           ) : orders.length === 0 ? (
-            <div className="p-4"><EmptyState title="No orders found. Make a sale in Register →" /></div>
+            <div className="p-4"><EmptyState title="No orders found. Make a sale in Register" /></div>
           ) : (
             <Table
               columns={columns}

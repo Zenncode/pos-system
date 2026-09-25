@@ -72,7 +72,17 @@ export function Table<T>({
                     >
                       {col.header}
                       {sortBy === col.key && (
-                        <span aria-hidden>{sortDir === "asc" ? "↑" : "↓"}</span>
+                        <span aria-hidden data-testid={sortDir === "asc" ? "sort-asc" : "sort-desc"}>
+                          {sortDir === "asc" ? (
+                            <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                            </svg>
+                          ) : (
+                            <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          )}
+                        </span>
                       )}
                     </button>
                   ) : (
