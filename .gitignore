@@ -12,3 +12,5 @@ POS-API/node_modules
 POS-API/package-lock.json
 *.log
 .DS_Store
+config.bat
+node_modules

@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { NavMeta } from "~/shared/layouts/MainLayout";
 
 function NavIcon({ route, active }: { route: string; active: boolean }): JSX.Element {
-  const cls = `size-5 ${active ? "text-emerald-700" : "text-slate-400 group-hover:text-slate-600"}`;
+  const cls = `size-5 ${active ? "text-[var(--color-primary)]" : "text-[var(--color-text-muted)] group-hover:text-[var(--color-text)]"}`;
   const paths: Record<string, JSX.Element> = {
     "/register": <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />,
     "/shift": <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />,
@@ -76,15 +76,15 @@ export function Sidebar({ items }: { items: NavMeta[] }): JSX.Element {
     <aside className={`flex h-full shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg)] ${collapsed ? "w-16" : "w-[240px]"}`} aria-label="Sidebar">
       {/* Brand Header — Apex POS */}
       <div className="flex h-16 items-center gap-3 border-b border-[var(--color-border)] px-4">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-700 text-white" aria-hidden="true">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)] text-white" aria-hidden="true">
           <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
         {collapsed ? null : (
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-sm font-bold tracking-tight text-slate-900">Apex POS</h2>
-            <p className="truncate text-[11px] font-medium text-slate-500">
+            <h2 className="truncate text-sm font-bold tracking-tight text-[var(--color-text)]">Apex POS</h2>
+            <p className="truncate text-[11px] font-medium text-[var(--color-text-muted)]">
               {demoMode ? "Offline Demo" : "Store Active"}
             </p>
           </div>
@@ -95,7 +95,7 @@ export function Sidebar({ items }: { items: NavMeta[] }): JSX.Element {
           aria-expanded={!collapsed}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-[var(--color-surface-hover)] hover:text-slate-700"
+          className="flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-md text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
         >
           <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             {collapsed ? (
@@ -110,7 +110,7 @@ export function Sidebar({ items }: { items: NavMeta[] }): JSX.Element {
       {/* Nav List — items come from MainLayout NAV_META (role-filtered) */}
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3" aria-label="Primary Navigation">
         {collapsed ? null : (
-          <div className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
             Terminal Menu
           </div>
         )}
@@ -126,20 +126,20 @@ export function Sidebar({ items }: { items: NavMeta[] }): JSX.Element {
                 collapsed ? "justify-center" : ""
               } ${
                 isActive
-                  ? "bg-emerald-50 text-emerald-900 font-semibold"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-[var(--color-surface-hover)] text-[var(--color-text)] font-semibold"
+                  : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
               }`}
               aria-current={isActive ? "page" : undefined}
             >
               {/* Active left indicator bar */}
               {isActive && !collapsed && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-md bg-emerald-600" aria-hidden="true" />
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-md bg-[var(--color-primary)]" aria-hidden="true" />
               )}
               <span className="shrink-0"><NavIcon route={n.route} active={isActive} /></span>
               {collapsed ? null : (
                 <>
                   <span className="flex-1 truncate">{n.label}</span>
-                  <span className={`text-[11px] font-normal ${isActive ? "text-emerald-700 font-medium" : "text-slate-400"}`}>
+                  <span className={`text-[11px] font-normal ${isActive ? "text-[var(--color-primary)] font-medium" : "text-[var(--color-text-muted)]"}`}>
                     {n.hint}
                   </span>
                 </>
@@ -147,7 +147,7 @@ export function Sidebar({ items }: { items: NavMeta[] }): JSX.Element {
               {/* Live Event Notification Badge */}
               {((n.route === "/orders" && orderBadge) || (n.route === "/products" && productBadge)) && (
                 <span
-                  className="flex size-2 items-center justify-center rounded-full bg-emerald-500 ring-4 ring-emerald-100 animate-pulse"
+                  className="flex size-2 items-center justify-center rounded-full bg-[var(--color-primary)] ring-4 ring-[var(--color-success-soft)] animate-pulse"
                   aria-label={n.route === "/orders" ? "New order received" : "Low stock alert"}
                 />
               )}
@@ -159,15 +159,15 @@ export function Sidebar({ items }: { items: NavMeta[] }): JSX.Element {
       {/* Staff Profile Footer */}
       <div className="border-t border-[var(--color-border)] p-3">
         <div className={`flex items-center gap-2.5 rounded-lg p-1.5 ${collapsed ? "justify-center" : ""}`}>
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-neutral-200)] text-xs font-bold text-[var(--color-text)]">
             {userInitial}
           </div>
           {collapsed ? null : (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-slate-800">{user?.name ?? "Cashier Staff"}</p>
+              <p className="truncate text-xs font-semibold text-[var(--color-text)]">{user?.name ?? "Cashier Staff"}</p>
               <div className="flex items-center gap-1.5">
-                <span className="inline-block size-1.5 rounded-full bg-emerald-500" />
-                <span className="truncate text-[10px] font-medium text-slate-500">{roleName}</span>
+                <span className="inline-block size-1.5 rounded-full bg-[var(--color-primary)]" />
+                <span className="truncate text-[10px] font-medium text-[var(--color-text-muted)]">{roleName}</span>
               </div>
             </div>
           )}
@@ -176,7 +176,7 @@ export function Sidebar({ items }: { items: NavMeta[] }): JSX.Element {
             onClick={() => void signOut()}
             title="Sign out of POS"
             aria-label="Sign out"
-            className="flex min-h-10 min-w-10 items-center justify-center rounded-md p-1.5 text-slate-400 hover:bg-[var(--color-surface-hover)] hover:text-red-600"
+            className="flex min-h-10 min-w-10 items-center justify-center rounded-md p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-danger)]"
           >
             <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

@@ -366,9 +366,9 @@ export default function Products(): JSX.Element {
     <div className="flex h-full min-h-0">
       <div className="w-[220px] shrink-0 border-r border-[var(--color-border)] bg-[var(--color-bg)] p-3">
         <p className="mb-2 px-1 text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">Categories</p>
-        <button onClick={() => setCatId("")} className={`mb-1 w-full rounded-lg border-l-2 px-3 py-2 text-left text-sm ${catId === "" ? "border-emerald-700 bg-[var(--color-surface-hover)] font-medium text-[var(--color-text)]" : "border-transparent text-[var(--color-neutral-700)] hover:bg-[var(--color-surface)]"}`}>All</button>
+        <button onClick={() => setCatId("")} className={`mb-1 w-full rounded-lg border-l-2 px-3 py-2 text-left text-sm ${catId === "" ? "border-[var(--color-primary)] bg-[var(--color-surface-hover)] font-medium text-[var(--color-text)]" : "border-transparent text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>All</button>
         {categories.map((c) => (
-          <button key={c.id} onClick={() => setCatId(c.id)} className={`mb-1 w-full rounded-lg border-l-2 px-3 py-2 text-left text-sm ${catId === c.id ? "border-emerald-700 bg-[var(--color-surface-hover)] font-medium text-[var(--color-text)]" : "border-transparent text-[var(--color-neutral-700)] hover:bg-[var(--color-surface)]"}`}>
+          <button key={c.id} onClick={() => setCatId(c.id)} className={`mb-1 w-full rounded-lg border-l-2 px-3 py-2 text-left text-sm ${catId === c.id ? "border-[var(--color-primary)] bg-[var(--color-surface-hover)] font-medium text-[var(--color-text)]" : "border-transparent text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"}`}>
             <span className="block truncate">{c.name}</span>
           </button>
         ))}

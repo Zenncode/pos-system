@@ -56,24 +56,24 @@ describe("Feedback — mutation killers", () => {
     // Kills: trend up renders up arrow + green + label
     it("renders up trend with green arrow and label", () => {
       render(<StatCard label="Revenue" value="$100" trend="up" trendLabel="+10%" />);
-      expect(screen.getByText("↑")).toBeInTheDocument();
-      expect(screen.getByText("↑")).toHaveClass("text-[var(--color-success)]");
+      expect(screen.getByTestId("trend-up")).toBeInTheDocument();
+      expect(screen.getByTestId("trend-up").closest("span")).toHaveClass("text-[var(--color-success)]");
       expect(screen.getByText("+10%")).toBeInTheDocument();
     });
 
     // Kills: trend down renders down arrow + red + label
     it("renders down trend with red arrow and label", () => {
       render(<StatCard label="Revenue" value="$100" trend="down" trendLabel="-5%" />);
-      expect(screen.getByText("↓")).toBeInTheDocument();
-      expect(screen.getByText("↓")).toHaveClass("text-[var(--color-danger)]");
+      expect(screen.getByTestId("trend-down")).toBeInTheDocument();
+      expect(screen.getByTestId("trend-down").closest("span")).toHaveClass("text-[var(--color-danger)]");
       expect(screen.getByText("-5%")).toBeInTheDocument();
     });
 
     // Kills: trend neutral renders arrow + muted
     it("renders neutral trend with muted arrow", () => {
       render(<StatCard label="Revenue" value="$100" trend="neutral" />);
-      expect(screen.getByText("→")).toBeInTheDocument();
-      expect(screen.getByText("→")).toHaveClass("text-[var(--color-text-muted)]");
+      expect(screen.getByTestId("trend-flat")).toBeInTheDocument();
+      expect(screen.getByTestId("trend-flat").closest("span")).toHaveClass("text-[var(--color-text-muted)]");
     });
 
     // Kills: default trendLabel when not provided

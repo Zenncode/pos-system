@@ -17,7 +17,7 @@ test.describe('shifts @shifts', () => {
     await loginAs(page, 'admin');
     await page.goto('/shift');
     await expect(page.getByRole('heading', { name: 'Open shift' })).toBeVisible({ timeout: 20_000 });
-    const openButton = page.getByRole('button', { name: 'Open shift & start selling' });
+    const openButton = page.getByRole('button', { name: 'Open shift' });
     await expect(openButton).toBeDisabled();
     await expect(page.getByText('Enter at least one denomination count.')).toBeVisible();
   });
@@ -29,7 +29,7 @@ test.describe('shifts @shifts', () => {
 
     // Count 5 of the first denomination, leave the rest at 0.
     await page.getByLabel(/Count of/).first().fill('5');
-    const openButton = page.getByRole('button', { name: 'Open shift & start selling' });
+    const openButton = page.getByRole('button', { name: 'Open shift' });
     await expect(openButton).toBeEnabled();
     await openButton.click();
     await expect(page).toHaveURL(/\/register/, { timeout: 20_000 });
