@@ -85,7 +85,7 @@ export default function Customers(): JSX.Element {
             ) : (
               <p className="text-sm text-[var(--color-text-muted)]">No recent orders. Attach this customer at checkout to build history.</p>
             )}
-            <p className="mt-4 text-xs text-[var(--color-text-muted)]">Tip: pick the customer in Register → checkout to link the sale.</p>
+            <p className="mt-4 text-xs text-[var(--color-text-muted)]">Tip: pick the customer in Register checkout to link the sale.</p>
           </div>
         )}
       </div>

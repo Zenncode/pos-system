@@ -60,7 +60,7 @@ export function RequireAuth({ children }: { children: JSX.Element }): JSX.Elemen
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)]">
-        <div className="size-6 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-emerald-700" />
+        <div className="size-6 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
       </div>
     );
   }
@@ -129,10 +129,10 @@ export default function MainLayout(): JSX.Element {
                 {item.label}
                 {(item.route === "/orders" && orderBadge) || (item.route === "/products" && productBadge) ? (
                   <span
-                    className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white animate-pulse"
+                    className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-[var(--color-primary)] text-[10px] font-bold text-white animate-pulse"
                     aria-label={item.route === "/orders" ? "New order received" : "Low stock alert"}
                   >
-                    •
+                    <span aria-hidden="true" className="size-1.5 rounded-full bg-white" />
                   </span>
                 ) : null}
               </Link>

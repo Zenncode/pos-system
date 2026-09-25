@@ -53,10 +53,10 @@ export function Topbar({ title, subtitle }: { title: string; subtitle?: string }
       <div className="flex items-center gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-base font-bold tracking-tight text-slate-900">{title}</h1>
+            <h1 className="text-base font-bold tracking-tight text-[var(--color-text)]">{title}</h1>
           </div>
           {subtitle ? (
-            <p className="text-xs font-medium text-slate-500">{subtitle}</p>
+            <p className="text-xs font-medium text-[var(--color-text-muted)]">{subtitle}</p>
           ) : null}
         </div>
       </div>
@@ -65,9 +65,9 @@ export function Topbar({ title, subtitle }: { title: string; subtitle?: string }
         {/* Realtime clock */}
         <span
           suppressHydrationWarning
-          className="hidden rounded-md bg-slate-50 px-2.5 py-1 font-mono text-[11px] font-medium text-slate-600 ring-1 ring-inset ring-slate-200/70 md:inline-flex items-center gap-1.5"
+          className="hidden rounded-md bg-[var(--color-surface)] px-2.5 py-1 font-mono text-[11px] font-medium tabular-nums text-[var(--color-text-muted)] ring-1 ring-inset ring-[var(--color-border)] md:inline-flex items-center gap-1.5"
         >
-          <svg className="size-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="size-3 text-[var(--color-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           {clock ?? "..."}
@@ -78,18 +78,18 @@ export function Topbar({ title, subtitle }: { title: string; subtitle?: string }
           {ordersDelta > 0 && (
             <span
               aria-label={`${ordersDelta} new order updates`}
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 animate-pulse"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-bg)] px-2.5 py-0.5 text-xs font-semibold text-[var(--color-text)] ring-1 ring-inset ring-[var(--color-border)] animate-pulse"
             >
-              <span className="size-1.5 rounded-full bg-emerald-600" />
+              <span className="size-1.5 rounded-full bg-[var(--color-primary)]" />
               {ordersDelta} new {ordersDelta === 1 ? "order" : "orders"}
             </span>
           )}
           {lowStockPulse > 0 && (
             <span
               aria-label={`${lowStockPulse} low-stock alerts`}
-              className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/20 animate-pulse"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-bg)] px-2.5 py-0.5 text-xs font-semibold text-[var(--color-danger)] ring-1 ring-inset ring-[var(--color-border)] animate-pulse"
             >
-              <span className="size-1.5 rounded-full bg-rose-600" />
+              <span className="size-1.5 rounded-full bg-[var(--color-danger)]" />
               Low Stock
             </span>
           )}
@@ -100,17 +100,17 @@ export function Topbar({ title, subtitle }: { title: string; subtitle?: string }
           shiftOpen ? (
             <Link
               to="/shift"
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800 ring-1 ring-inset ring-emerald-600/20 hover:bg-emerald-100/80 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-bg)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)] ring-1 ring-inset ring-[var(--color-border)] hover:bg-[var(--color-surface-hover)] transition-colors"
             >
-              <span className="size-2 rounded-full bg-emerald-600" />
+              <span className="size-2 rounded-full bg-[var(--color-primary)]" />
               <span>Shift Open</span>
             </Link>
           ) : (
             <Link
               to="/shift"
-              className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20 hover:bg-amber-100 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-bg)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)] ring-1 ring-inset ring-[var(--color-border)] hover:bg-[var(--color-surface-hover)] transition-colors"
             >
-              <span className="size-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="size-2 rounded-full bg-[var(--color-warning)] animate-pulse" />
               <span>Shift Closed · Open Drawer</span>
             </Link>
           )
@@ -121,35 +121,35 @@ export function Topbar({ title, subtitle }: { title: string; subtitle?: string }
         {demoMode ? (
           <span
             title="Running in local resilient demo mode with sample store data"
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[var(--color-surface)] px-2.5 py-1 text-xs font-medium text-[var(--color-text-muted)] ring-1 ring-inset ring-[var(--color-border)]"
           >
-            <span className="size-2 rounded-full bg-slate-400" />
+            <span className="size-2 rounded-full bg-[var(--color-neutral-400)]" />
             <span>Demo Mode</span>
           </span>
         ) : online === null ? (
           <span
             role="status"
             title="Checking connection to the API backend"
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[var(--color-surface)] px-2.5 py-1 text-xs font-medium text-[var(--color-text-muted)] ring-1 ring-inset ring-[var(--color-border)]"
           >
-            <span className="size-2 animate-pulse rounded-full bg-slate-400" />
+            <span className="size-2 animate-pulse rounded-full bg-[var(--color-neutral-400)]" />
             <span>Checking connection</span>
           </span>
         ) : online ? (
           <span
             title="Connected to live API backend"
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800 ring-1 ring-inset ring-emerald-600/20"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[var(--color-bg)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)] ring-1 ring-inset ring-[var(--color-border)]"
           >
-            <span className="size-2 rounded-full bg-emerald-500" />
+            <span className="size-2 rounded-full bg-[var(--color-primary)]" />
             <span>Live Server</span>
           </span>
         ) : (
           <span
             role="status"
             title="API backend unreachable — the register keeps working with local data"
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[var(--color-bg)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)] ring-1 ring-inset ring-[var(--color-border)]"
           >
-            <span className="size-2 rounded-full bg-amber-500" />
+            <span className="size-2 rounded-full bg-[var(--color-warning)]" />
             <span>Offline</span>
           </span>
         )}

@@ -17,18 +17,7 @@ import { startRealtime } from "./lib/socketClient";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 
-export const links: () => { rel: string; href: string; crossOrigin?: string }[] = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-  },
-];
+export const links: () => { rel: string; href: string; crossOrigin?: string }[] = () => [];
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
