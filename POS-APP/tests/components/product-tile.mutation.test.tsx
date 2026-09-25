@@ -54,6 +54,25 @@ describe("ProductTile — mutation killers", () => {
     expect(screen.getByText("2 left")).toBeInTheDocument();
   });
 
+  // Kills: below-threshold stock shows low badge (not Out, not count)
+  it("shows low badge when stock is below threshold but above zero", () => {
+    render(<ProductTile product={{ ...product, stock: 1, lowStockThreshold: 2 }} onAdd={vi.fn()} />);
+    expect(screen.getByText("1 left")).toBeInTheDocument();
+    expect(screen.queryByText("Out")).toBeNull();
+    const btn = screen.getByRole("button", { name: /Coffee/ });
+    expect(btn).not.toBeDisabled();
+    expect(btn).toHaveAttribute("title", "Add Coffee to cart");
+  });
+
+  // Kills: out-of-stock button is natively non-submitting (click suppression
+  // comes from the disabled attribute — browsers never dispatch user clicks).
+  it("out-of-stock tile is a disabled non-submitting button", () => {
+    render(<ProductTile product={outOfStockProduct} onAdd={vi.fn()} />);
+    const btn = screen.getByRole("button", { name: /Coffee/ });
+    expect(btn).toBeDisabled();
+    expect(btn).toHaveAttribute("type", "button");
+  });
+
   // Kills: out badge when stock <= 0
   it("shows Out badge when stock <= 0", () => {
     render(<ProductTile product={outOfStockProduct} onAdd={vi.fn()} />);

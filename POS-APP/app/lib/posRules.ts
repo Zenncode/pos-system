@@ -1,6 +1,7 @@
 // Pure POS business rules — SRS §13 (Business Rules) + §13.1 defaults.
 // Money is cents everywhere. These are UI-side guards; server re-checks (SEC-08).
 import type { CashCount, Order } from "../types";
+import { formatCents } from "./format";
 
 // Config defaults (SRS §13.1). TODO: read from a /api/config endpoint (contract gap).
 export const DISCOUNT_MAX_PCT = 10; // cashier may discount up to 10% …
@@ -46,6 +47,53 @@ export function splitOverpayAllowed(tenders: { method: string; amountCents: numb
   const sum = tenders.reduce((s, t) => s + t.amountCents, 0);
   if (sum <= totalCents) return true;
   return tenders.some((t) => t.method === "CASH");
+}
+
+// Fresh-total basis for charge validation: the discount input may not have
+// blurred yet, so the rendered total can be stale. The charge path commits the
+// pending discount first (cap − pendingDiscount) and validates against THAT
+// total — never the stale rendered one. Integer cents end-to-end.
+export function chargeTotalCents(capCents: number, discountCents: number): number {
+  return Math.max(0, capCents - discountCents);
+}
+
+// Canonical split-tender validation — the same predicate the register uses for
+// the SPLIT affordance (splitValid) and for the doCharge() guard. Tenders must
+// cover the (fresh) total across ≥2 rows; overpay needs a cash tender (BR-04).
+export function isSplitTenderValid(
+  tenders: { method: string; amountCents: number }[],
+  totalCents: number,
+): boolean {
+  const remaining = splitRemainingCents(totalCents, tenders);
+  return (
+    tenders.length >= 2 &&
+    remaining <= 0 &&
+    (remaining === 0 || splitOverpayAllowed(tenders, totalCents))
+  );
+}
+
+export interface CashDecision {
+  covered: boolean;
+  changeCents: number;
+  remainingCents: number;
+}
+
+// Canonical cash-tender display/decision — the same predicate the register CASH
+// banner, confirm affordance, and doCharge() guard all key off: covered when
+// tenderedCents >= charge total; change/remaining derived from the same basis.
+export function cashDecision(tenderedCents: number, chargeTotal: number): CashDecision {
+  const covered = tenderedCents >= chargeTotal;
+  return {
+    covered,
+    changeCents: covered ? tenderedCents - chargeTotal : 0,
+    remainingCents: covered ? 0 : chargeTotal - tenderedCents,
+  };
+}
+
+// Canonical confirm-button label for the CASH tab — mirrors the register copy
+// exactly ("Enter amount" while short, "Confirm <formatted total>" when covered).
+export function cashConfirmLabel(tenderedCents: number, chargeTotal: number): string {
+  return tenderedCents < chargeTotal ? "Enter amount" : `Confirm ${formatCents(chargeTotal)}`;
 }
 
 // Expected drawer at close: float + cash received − cash given back as change, for paid orders.

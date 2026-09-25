@@ -52,11 +52,24 @@ export function Table<T>({
               {columns.map((col) => (
                 <th
                   key={col.key}
+                  aria-sort={
+                    col.sortable && onSort
+                      ? sortBy === col.key
+                        ? sortDir === "asc"
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                      : undefined
+                  }
                   className={`px-4 py-3 ${col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : ""}`}
                   style={col.width ? { width: col.width } : undefined}
                 >
                   {col.sortable && onSort ? (
-                    <button onClick={() => onSort(col.key)} className="flex items-center gap-1 hover:text-[var(--color-text)]">
+                    <button
+                      type="button"
+                      onClick={() => onSort(col.key)}
+                      className="inline-flex min-h-10 items-center gap-1 hover:text-[var(--color-text)]"
+                    >
                       {col.header}
                       {sortBy === col.key && (
                         <span aria-hidden>{sortDir === "asc" ? "↑" : "↓"}</span>
@@ -85,7 +98,7 @@ export function Table<T>({
               </tr>
             ) : (
               data.map((row) => (
-                <tr key={rowKey(row)} className={onRowClick ? "hover:bg-[var(--color-surface)] cursor-pointer" : ""} onClick={() => onRowClick?.(row)} tabIndex={onRowClick ? 0 : undefined} onKeyDown={onRowClick ? (e) => { if (e.key === "Enter") onRowClick(row); } : undefined}>
+                <tr key={rowKey(row)} role={onRowClick ? "button" : undefined} className={onRowClick ? "hover:bg-[var(--color-surface)] cursor-pointer" : ""} onClick={() => onRowClick?.(row)} tabIndex={onRowClick ? 0 : undefined} onKeyDown={onRowClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onRowClick(row); } } : undefined}>
                   {columns.map((col) => (
                     <td key={col.key} className={`px-4 py-3 ${col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : ""}`}>
                       {col.render(row)}

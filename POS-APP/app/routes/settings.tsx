@@ -1,18 +1,24 @@
 import { useState } from "react";
 import type { JSX } from "react";
+import { Navigate } from "react-router";
 import { checkHealth } from "~/lib/api";
 import { getApiBase } from "~/lib/httpClient";
-import { useAuth } from "~/shared/hooks/useAuth";
+import { useAuth, roleAtLeast } from "~/shared/hooks/useAuth";
 import { useToast } from "~/shared/hooks/useToast";
 import { Button } from "~/shared/components/ui/Button";
 import { Input } from "~/shared/components/ui/Input";
+import type { Role } from "~/types";
 
 export function meta(): { title: string }[] {
   return [{ title: "Settings — Point of Sale" }];
 }
 
+function canViewSettings(role: Role | undefined): boolean {
+  return roleAtLeast(role, "ADMIN");
+}
+
 export default function Settings(): JSX.Element {
-  const { user, demoMode } = useAuth();
+  const { user, loading, demoMode } = useAuth();
   const { push } = useToast();
   const [storeName, setStoreName] = useState("Main Store");
   const [receiptFooter, setReceiptFooter] = useState("Thank you — come again!");
@@ -20,12 +26,24 @@ export default function Settings(): JSX.Element {
   const [checking, setChecking] = useState(false);
   const [health, setHealth] = useState("");
 
+  if (loading) return <></>;
+
+  const allowed = canViewSettings(user?.role);
+
+  if (!allowed) return <Navigate to="/register" replace />;
+
   async function onCheck(): Promise<void> {
     setChecking(true);
-    const h = await checkHealth();
-    setHealth(h.ok ? `API reachable · ${h.latencyMs}ms` : "API offline — running in demo mode");
-    push(h.ok ? "success" : "info", h.ok ? "API is reachable." : "API offline — demo data active.");
-    setChecking(false);
+    try {
+      const h = await checkHealth();
+      setHealth(h.ok ? `API reachable · ${h.latencyMs}ms` : "API offline — running in demo mode");
+      push(h.ok ? "success" : "info", h.ok ? "API is reachable." : "API offline — demo data active.");
+    } catch {
+      setHealth("API offline — running in demo mode");
+      push("info", "API offline — demo data active.");
+    } finally {
+      setChecking(false);
+    }
   }
 
   return (

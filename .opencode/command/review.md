@@ -1,5 +1,5 @@
 ---
-description: Human review assist (scout recon + reviewer + E2E + acceptance + flag check) — GLM orchestrator fans out to free workers.
+description: Human review assist (scout recon + reviewer + E2E + acceptance + flag check) — Muse Spark orchestrator fans out to free workers.
 agent: orchestrator
 ---
 

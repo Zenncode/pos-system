@@ -36,9 +36,11 @@ export interface Product {
 }
 
 export type OrderStatus = "PENDING" | "PAID" | "VOID" | "REFUNDED";
-// WALLET is a CLIENT extension pending @api approval (REQUEST 2026-09-13,
-// paymentInputSchema.method). The register only emits it in demo mode.
-export type PaymentMethod = "CASH" | "CARD" | "QR" | "WALLET";
+// Mirrors POS-API paymentInputSchema.method (POS-API/zod/order.schema.ts):
+// exactly CASH | CARD | QR. Do NOT extend client-side — an unknown method
+// is rejected by the server with 400.
+export const ALLOWED_PAYMENT_METHODS = ["CASH", "CARD", "QR"] as const;
+export type PaymentMethod = (typeof ALLOWED_PAYMENT_METHODS)[number];
 
 export interface OrderItem {
   id: string;

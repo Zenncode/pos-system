@@ -14,7 +14,8 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-8 px-3 text-[13px]",
+  // sm keeps compact text but guarantees the 40px minimum cashier/touch target.
+  sm: "h-10 min-w-10 px-3 text-[13px]",
   md: "h-10 px-4 text-sm",
   lg: "h-12 px-5 text-[15px]",
 };

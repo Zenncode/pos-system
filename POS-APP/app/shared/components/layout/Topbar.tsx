@@ -49,7 +49,7 @@ export function Topbar({ title, subtitle }: { title: string; subtitle?: string }
   }, []);
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/90 bg-white/90 px-6 backdrop-blur-md">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg)] px-6">
       <div className="flex items-center gap-3">
         <div>
           <div className="flex items-center gap-2">
@@ -116,22 +116,41 @@ export function Topbar({ title, subtitle }: { title: string; subtitle?: string }
           )
         )}
 
-        {/* System Online / Offline Indicator */}
-        {demoMode || online === false ? (
+        {/* System Online / Offline Indicator — neutral until the first
+            health request resolves; never "Live Server" while unknown. */}
+        {demoMode ? (
           <span
             title="Running in local resilient demo mode with sample store data"
-            className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200"
           >
             <span className="size-2 rounded-full bg-slate-400" />
             <span>Demo Mode</span>
           </span>
-        ) : (
+        ) : online === null ? (
+          <span
+            role="status"
+            title="Checking connection to the API backend"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200"
+          >
+            <span className="size-2 animate-pulse rounded-full bg-slate-400" />
+            <span>Checking connection</span>
+          </span>
+        ) : online ? (
           <span
             title="Connected to live API backend"
-            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800 ring-1 ring-inset ring-emerald-600/20"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800 ring-1 ring-inset ring-emerald-600/20"
           >
-            <span className="size-2 rounded-full bg-emerald-500 shadow-xs" />
+            <span className="size-2 rounded-full bg-emerald-500" />
             <span>Live Server</span>
+          </span>
+        ) : (
+          <span
+            role="status"
+            title="API backend unreachable — the register keeps working with local data"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20"
+          >
+            <span className="size-2 rounded-full bg-amber-500" />
+            <span>Offline</span>
           </span>
         )}
       </div>

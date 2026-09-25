@@ -1,5 +1,5 @@
 ---
-description: Run Tier 1 mandatory checks (static + unit + mutation + reviewer) — GLM orchestrator fans out to free workers.
+description: Run Tier 1 mandatory checks (static + unit + mutation + reviewer) — Muse Spark orchestrator fans out to free workers.
 agent: orchestrator
 ---
 

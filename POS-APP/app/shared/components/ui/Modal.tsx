@@ -72,11 +72,11 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-[var(--z-modal-backdrop)] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={title}>
-      <button aria-label="Close" onClick={onClose} className="absolute inset-0 bg-[var(--color-overlay)]" />
+      <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-[var(--color-overlay)]" />
       <div ref={containerRef} className={`pos-sheet relative w-full ${wide ? "max-w-2xl" : "max-w-md"} rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-bg)] p-6 shadow-[var(--shadow-sm)]`}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-[var(--color-text)]">{title}</h2>
-          <button onClick={onClose} className="rounded-md px-2 py-1 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]" aria-label="Close dialog">✕</button>
+          <button type="button" onClick={onClose} className="flex min-h-10 min-w-10 items-center justify-center rounded-md px-2 py-1 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]" aria-label="Close dialog">✕</button>
         </div>
         {children}
       </div>

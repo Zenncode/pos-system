@@ -93,6 +93,29 @@ export function ErrorBoundary({ error }: { error: unknown }) {
           <code className="text-xs text-[var(--color-neutral-700)]">{stack}</code>
         </pre>
       )}
+      <div className="mt-6 flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="inline-flex min-h-10 w-full items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-medium text-white hover:bg-[var(--color-primary-hover)]"
+        >
+          Try again
+        </button>
+        <div className="flex gap-2">
+          <a
+            href="/"
+            className="inline-flex min-h-10 flex-1 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+          >
+            Go to home
+          </a>
+          <a
+            href="/login"
+            className="inline-flex min-h-10 flex-1 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+          >
+            Go to sign-in
+          </a>
+        </div>
+      </div>
     </main>
   );
 }

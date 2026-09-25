@@ -3,17 +3,23 @@
   "mutate": [
     "app/shared/components/ui/Button.tsx",
     "app/shared/components/ui/Modal.tsx",
+    "app/shared/components/ui/CartLine.tsx",
     "app/shared/components/ui/ProductTile.tsx",
-    "app/shared/components/ui/Table.tsx"
+    "app/shared/components/ui/Select.tsx",
+    "app/shared/components/ui/Table.tsx",
+    "app/shared/components/ui/Toaster.tsx",
+    "app/shared/components/ui/Badge.tsx",
+    "app/shared/components/ui/Input.tsx",
+    "app/shared/components/ui/Feedback.tsx"
   ],
   "testRunner": "command",
   "commandRunner": {
-    "command": "npx vitest run tests/components/button.test.tsx tests/components/button.mutation.test.tsx tests/components/modal.test.tsx tests/components/modal.mutation.test.tsx tests/components/product-tile.mutation.test.tsx tests/components/table.mutation.test.tsx tests/components/delta-killers.test.tsx"
+    "command": "npm run test:components"
   },
   "coverageAnalysis": "off",
   "concurrency": 4,
-  "timeoutMS": 30000,
-  "timeoutFactor": 2,
+  "timeoutMS": 60000,
+  "timeoutFactor": 3,
   "thresholds": {
     "high": 80,
     "low": 70,

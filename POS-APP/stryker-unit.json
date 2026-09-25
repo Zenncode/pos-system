@@ -1,0 +1,26 @@
+{
+  "schema": "https://stryker-mutator.io/schema/stryker-schema.json",
+  "mutate": [
+    "app/lib/posRules.ts",
+    "app/lib/discount.ts"
+  ],
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "npx vitest run tests/unit/posRules.test.ts tests/unit/discount.test.ts"
+  },
+  "coverageAnalysis": "off",
+  "concurrency": 4,
+  "timeoutMS": 15000,
+  "timeoutFactor": 1.5,
+  "thresholds": {
+    "high": 80,
+    "low": 70,
+    "break": 70
+  },
+  "reporters": [
+    "clear-text",
+    "json"
+  ],
+  "allowEmpty": false,
+  "cleanTempDir": true
+}

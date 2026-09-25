@@ -3,7 +3,8 @@ import type { JSX } from "react";
 import { useNavigate } from "react-router";
 import { ApiError, checkout, deliverReceipt, listCategories, listCustomers, listProducts, lookupBarcode, requestOverride } from "~/lib/api";
 import { formatCents, newIdempotencyKey, parseToCents } from "~/lib/format";
-import { discountOverThreshold, splitOverpayAllowed, validEmail, validPhone } from "~/lib/posRules";
+import { computeDiscountCents as computeDiscountCentsPure } from "~/lib/discount";
+import { cashConfirmLabel, cashDecision, chargeTotalCents, discountOverThreshold, isSplitTenderValid, splitOverpayAllowed, splitRemainingCents, validEmail, validPhone } from "~/lib/posRules";
 import { useAuth } from "~/shared/hooks/useAuth";
 import { useCart } from "~/shared/hooks/useCart";
 import { useShift } from "~/shared/hooks/useShift";
@@ -103,6 +104,7 @@ export default function Register(): JSX.Element {
     { method: "CARD", amount: "" },
   ]);
   const [charging, setCharging] = useState(false);
+  const chargingRef = useRef(false);
   const [receipt, setReceipt] = useState<{
     orderId: string;
     orderNumber: string;
@@ -117,9 +119,13 @@ export default function Register(): JSX.Element {
   const idemRef = useRef(newIdempotencyKey());
 
   const searchRef = useRef<HTMLInputElement>(null);
+  const compactSearchRef = useRef<HTMLInputElement>(null);
   const discRef = useRef<HTMLInputElement>(null);
   const custRef = useRef<HTMLSelectElement>(null);
   const selectedCustomer = customers.find((c) => c.id === customerId) ?? null;
+  // Narrow viewports show Catalog and Cart one at a time (local UI state only).
+  const [mobileView, setMobileView] = useState<"catalog" | "cart">("catalog");
+  const cartCount = lines.reduce((s, l) => s + l.qty, 0);
 
   useEffect(() => {
     const t = window.setTimeout(() => setDebouncedQ(query.trim()), 250);
@@ -150,21 +156,46 @@ export default function Register(): JSX.Element {
   }, [load]);
 
   // Keyboard: F2 search, F3 customer, F4 discount, F8 charge (open shift only), Esc close (via Modal)
+  // F3/F4 live in the cart pane, which is hidden on narrow viewports unless
+  // the Cart view is active — switch there first so focus never lands on a
+  // hidden input, then focus after the pane renders.
   useEffect(() => {
+    const focusSearch = (): void => {
+      // Wide layout (xl+) shows the rail search; narrower shows the compact one.
+      const wide = window.matchMedia("(min-width: 1280px)").matches;
+      const el = wide ? searchRef.current : compactSearchRef.current;
+      (el ?? searchRef.current)?.focus();
+      (el ?? searchRef.current)?.select();
+    };
+    const ensureCartVisible = (): boolean => {
+      if (window.matchMedia("(min-width: 1024px)").matches) return false;
+      // Narrow viewport: the cart pane may be hidden behind the view switch.
+      // Always switch (no-op if already there) and defer focus a tick so the
+      // pane renders first. No state-updater side effects — the updater stays pure.
+      setMobileView("cart");
+      return true;
+    };
+    const focusSoon = (fn: () => void, switched: boolean): void => {
+      if (switched) window.setTimeout(fn, 0);
+      else fn();
+    };
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === "F2") {
         e.preventDefault();
-        searchRef.current?.focus();
-        searchRef.current?.select();
+        focusSearch();
       }
       if (e.key === "F3") {
         e.preventDefault();
-        custRef.current?.focus();
+        const switched = ensureCartVisible();
+        focusSoon(() => custRef.current?.focus(), switched);
       }
       if (e.key === "F4") {
         e.preventDefault();
-        discRef.current?.focus();
-        discRef.current?.select();
+        const switched = ensureCartVisible();
+        focusSoon(() => {
+          discRef.current?.focus();
+          discRef.current?.select();
+        }, switched);
       }
       if (e.key === "F8") {
         e.preventDefault();
@@ -200,12 +231,8 @@ export default function Register(): JSX.Element {
     }
   }
 
-  function computeDiscountCents(cap: number): number {
-    if (discMode === "PCT") {
-      const pct = Number(discValue.replace(/[^0-9.]/g, "")) || 0;
-      return Math.max(0, Math.min(cap, Math.round((cap * Math.min(100, pct)) / 100)));
-    }
-    return Math.max(0, Math.min(cap, parseToCents(discValue || "0")));
+  function computeDiscountCents(cap: number | undefined | null): number {
+    return computeDiscountCentsPure(discValue, discMode, cap);
   }
 
   function commitDiscount(): void {
@@ -272,6 +299,14 @@ export default function Register(): JSX.Element {
   }
 
   const tenderedCents = parseToCents(tendered || "0");
+  // Fresh-total basis for split validation: the discount input may not have
+  // blurred yet, so totals.totalCents can be stale while doCharge() charges
+  // finalTotal = cap - pendingDiscount. Validate against the SAME pending
+  // total the charge uses. When the input is already committed, pending ==
+  // totals.discountCents and chargeTotal == totals.totalCents (no behavior change).
+  const chargeCap = totals.subtotalCents + totals.taxCents;
+  const pendingDiscCents = computeDiscountCentsPure(discValue, discMode, chargeCap);
+  const chargeTotal = chargeTotalCents(chargeCap, pendingDiscCents);
   const splitRows = useMemo(
     () =>
       payTab === "SPLIT"
@@ -282,26 +317,20 @@ export default function Register(): JSX.Element {
     [payTab, tenders],
   );
   const splitSum = splitRows.reduce((s, t) => s + t.amountCents, 0);
-  const splitRemaining = totals.totalCents - splitSum;
-  const splitValid =
-    splitRows.length >= 2 &&
-    splitRemaining <= 0 &&
-    (splitRemaining === 0 || splitOverpayAllowed(splitRows, totals.totalCents));
+  const splitRemaining = splitRemainingCents(chargeTotal, splitRows);
+  const splitValid = isSplitTenderValid(splitRows, chargeTotal);
+  const cash = cashDecision(tenderedCents, chargeTotal);
   const canCharge =
-    totals.totalCents > 0 &&
+    chargeTotal > 0 &&
     shiftOpen &&
     (payTab === "CASH"
-      ? tenderedCents >= totals.totalCents
+      ? cash.covered
       : payTab === "SPLIT"
         ? splitValid
         : true);
 
   async function doCharge(): Promise<void> {
-    if (charging || !shiftOpen) return;
-    if (payTab === "WALLET" && !demoMode) {
-      push("error", "Wallet payments aren't supported by the server yet.");
-      return;
-    }
+    if (chargingRef.current || charging || !shiftOpen) return;
     // Commit discount at charge time (input may not have blurred yet).
     const cap = totals.subtotalCents + totals.taxCents;
     const d = computeDiscountCents(cap);
@@ -318,8 +347,11 @@ export default function Register(): JSX.Element {
         push("error", "Split needs at least 2 tenders with amounts.");
         return;
       }
-      if (splitRemaining > 0) {
-        push("error", `${formatCents(splitRemaining)} still due.`);
+      // Validate against the SAME finalTotal charged below — never the
+      // possibly-stale totals.totalCents rendered before this commit.
+      const finalRemaining = splitRemainingCents(finalTotal, splitRows);
+      if (finalRemaining > 0) {
+        push("error", `${formatCents(finalRemaining)} still due.`);
         return;
       }
       if (!splitOverpayAllowed(splitRows, finalTotal)) {
@@ -327,9 +359,10 @@ export default function Register(): JSX.Element {
         return;
       }
     }
-    if (payTab === "CASH" && tenderedCents < finalTotal) return;
+    if (payTab === "CASH" && !cashDecision(tenderedCents, finalTotal).covered) return;
 
-setCharging(true);
+    chargingRef.current = true;
+    setCharging(true);
     try {
       const { order, changeCents } = await checkout(
         {
@@ -378,14 +411,40 @@ setCharging(true);
     } catch {
       push("error", "Checkout failed. Try again.");
     } finally {
+      chargingRef.current = false;
       setCharging(false);
     }
   }
 
   return (
-    <div className="flex h-full min-h-0 bg-slate-50">
-      {/* Left rail — 240px */}
-      <div className="flex w-[240px] shrink-0 flex-col border-r border-slate-200/90 bg-white">
+    <div className="flex h-full min-h-0 flex-col bg-slate-50 lg:flex-row">
+      {/* Catalog/Cart view switch — narrow viewports only; both panes stay
+          mounted so cart state, shortcuts and persistence are untouched. */}
+      <div className="flex shrink-0 gap-2 border-b border-slate-200/90 bg-white p-2 lg:hidden" role="group" aria-label="Register view">
+        {(["catalog", "cart"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            aria-pressed={mobileView === v}
+            onClick={() => setMobileView(v)}
+            className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg border px-3 text-sm font-medium ${
+              mobileView === v
+                ? "border-[var(--color-primary)] bg-[var(--color-success)]/10 text-[var(--color-success)]"
+                : "border-[var(--color-border)] text-[var(--color-neutral-700)]"
+            }`}
+          >
+            {v === "catalog" ? "Catalog" : "Cart"}
+            {v === "cart" && cartCount > 0 && (
+              <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-bold tabular-nums text-white" aria-label={`${cartCount} items in cart`}>
+                {cartCount}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Left rail — fixed 240px vertical list on xl+ only */}
+      <div className="hidden w-[240px] shrink-0 flex-col border-r border-slate-200/90 bg-white xl:flex">
         <div className="p-3 border-b border-slate-100">
           <div className="relative">
             <Input
@@ -399,14 +458,13 @@ setCharging(true);
               aria-label="Search products"
               autoComplete="off"
               spellCheck={false}
-              autoFocus
               className="text-xs pr-7"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                className="absolute right-1 top-1/2 flex min-h-10 min-w-10 -translate-y-1/2 items-center justify-center text-slate-400 hover:text-slate-600"
                 aria-label="Clear search"
               >
                 ✕
@@ -414,29 +472,31 @@ setCharging(true);
             )}
           </div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2 space-y-0.5" role="tablist" aria-label="Categories">
+        <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2 space-y-0.5" role="group" aria-label="Categories">
           <button
+            type="button"
             onClick={() => setCatId("")}
             aria-current={catId === "" ? "true" : undefined}
-            className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+            className={`flex min-h-10 w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium ${
               catId === ""
-                ? "bg-emerald-50 text-emerald-900 font-semibold shadow-xs"
+                ? "bg-emerald-50 text-emerald-900 font-semibold"
                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             }`}
           >
             <span>All items</span>
-            <span className="rounded-full bg-slate-100 px-1.5 py-0.2 text-[10px] text-slate-500 font-mono">
+            <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500 font-mono">
               {products.length}
             </span>
           </button>
           {categories.map((c) => (
             <button
               key={c.id}
+              type="button"
               onClick={() => setCatId(c.id)}
               aria-current={catId === c.id ? "true" : undefined}
-              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+              className={`flex min-h-10 w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium ${
                 catId === c.id
-                  ? "bg-emerald-50 text-emerald-900 font-semibold shadow-xs"
+                  ? "bg-emerald-50 text-emerald-900 font-semibold"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
@@ -446,8 +506,68 @@ setCharging(true);
         </div>
       </div>
 
+      {/* Compact category selector — search + horizontal chips below xl */}
+      <div className="shrink-0 border-b border-slate-200/90 bg-white xl:hidden">
+        <div className="p-2">
+          <div className="relative">
+            <Input
+              ref={compactSearchRef}
+              placeholder="Search SKU or scan… (F2)"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void onSearchEnter();
+              }}
+              aria-label="Search products"
+              autoComplete="off"
+              spellCheck={false}
+              className="pr-10 text-sm"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute right-1 top-1/2 flex min-h-10 min-w-10 -translate-y-1/2 items-center justify-center text-slate-400 hover:text-slate-600"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-1.5 overflow-x-auto px-2 pb-2" role="group" aria-label="Categories">
+          <button
+            type="button"
+            onClick={() => setCatId("")}
+            aria-current={catId === "" ? "true" : undefined}
+            className={`min-h-10 shrink-0 rounded-full border px-3 text-xs font-medium ${
+              catId === ""
+                ? "border-emerald-600 bg-emerald-50 text-emerald-900 font-semibold"
+                : "border-slate-200 text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            All items
+          </button>
+          {categories.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setCatId(c.id)}
+              aria-current={catId === c.id ? "true" : undefined}
+              className={`min-h-10 shrink-0 rounded-full border px-3 text-xs font-medium ${
+                catId === c.id
+                  ? "border-emerald-600 bg-emerald-50 text-emerald-900 font-semibold"
+                  : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Center — product grid (shift-gated) */}
-      <div className="min-w-0 flex-1 overflow-y-auto bg-[var(--color-surface)] p-4">
+      <div className={`${mobileView === "catalog" ? "flex" : "hidden"} min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-[var(--color-surface)] p-4 lg:flex`}>
         {shiftLoading ? (
           <Spinner />
         ) : !shiftOpen ? (
@@ -499,8 +619,8 @@ setCharging(true);
         )}
       </div>
 
-      {/* Right cart — 380px */}
-      <div className="flex w-[380px] shrink-0 flex-col border-l border-[var(--color-border)] bg-[var(--color-bg)]">
+      {/* Right cart — full width on narrow (via view switch), 320px on lg, 380px on xl */}
+      <div className={`${mobileView === "cart" ? "flex" : "hidden"} min-h-0 w-full shrink-0 flex-col border-t border-[var(--color-border)] bg-[var(--color-bg)] lg:flex lg:w-[320px] lg:border-l lg:border-t-0 xl:w-[380px]`}>
         <div className="border-b border-[var(--color-border)] p-3">
           <div className="flex gap-2">
             <Select
@@ -524,8 +644,9 @@ setCharging(true);
               aria-label="Discount"
             />
             <button
+              type="button"
               onClick={() => setDiscMode((m) => (m === "PCT" ? "FIX" : "PCT"))}
-              className="h-9 w-10 shrink-0 rounded-lg border border-[var(--color-border)] text-xs font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
+              className="flex min-h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] text-xs font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]"
               aria-label="Toggle discount mode"
             >
               {discMode === "PCT" ? "%" : "₱"}
@@ -636,14 +757,14 @@ setCharging(true);
       {/* Payment sheet */}
       {payOpen ? (
         <Modal title={formatCents(totals.totalCents)} onClose={() => setPayOpen(false)}>
-          <div className="mb-3 flex gap-2" role="tablist" aria-label="Payment method">
+          <div className="mb-3 flex gap-2" role="group" aria-label="Payment method">
             {(["CASH", "CARD", "QR", "SPLIT"] as const).map((m) => (
               <button
                 key={m}
-                role="tab"
-                aria-selected={payTab === m}
+                type="button"
+                aria-pressed={payTab === m}
                 onClick={() => setPayTab(m)}
-                className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${payTab === m ? "border-[var(--color-primary)] bg-[var(--color-success)]/10 text-[var(--color-success)]" : "border-[var(--color-border)] text-[var(--color-neutral-700)] hover:bg-[var(--color-surface)]"}`}
+                className={`min-h-10 flex-1 rounded-lg border px-3 py-2 text-sm font-medium ${payTab === m ? "border-[var(--color-primary)] bg-[var(--color-success)]/10 text-[var(--color-success)]" : "border-[var(--color-border)] text-[var(--color-neutral-700)] hover:bg-[var(--color-surface)]"}`}
               >
                 {m}
               </button>
@@ -674,8 +795,8 @@ setCharging(true);
                   <button
                     key={c}
                     type="button"
-                    onClick={() => setTendered(c === 0 ? (totals.totalCents / 100).toFixed(2) : (c / 100).toFixed(2))}
-                    className="flex-1 rounded-lg border border-slate-200 bg-slate-50 py-2 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-800 transition-colors active:scale-95"
+                    onClick={() => setTendered(c === 0 ? (chargeTotal / 100).toFixed(2) : (c / 100).toFixed(2))}
+                    className="flex min-h-10 flex-1 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 py-2 text-xs font-semibold text-slate-700 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-800"
                   >
                     {c === 0 ? "Exact" : formatCents(c)}
                   </button>
@@ -688,15 +809,16 @@ setCharging(true);
                   <button
                     key={k}
                     type="button"
+                    aria-label={k === "C" ? "Clear tendered amount" : `Enter ${k}`}
                     onClick={() => {
                       if (k === "C") setTendered("");
                       else if (k === "." && tendered.includes(".")) return;
                       else setTendered((prev) => prev + k);
                     }}
-                    className={`rounded-lg py-2.5 text-sm font-semibold transition-all active:scale-95 ${
+                    className={`min-h-10 rounded-lg py-2.5 text-sm font-semibold ${
                       k === "C"
                         ? "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
-                        : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-300 shadow-xs"
+                        : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-300"
                     }`}
                   >
                     {k}
@@ -704,20 +826,20 @@ setCharging(true);
                 ))}
               </div>
 
-              {/* Change due / Remaining Banner */}
-              {tenderedCents >= totals.totalCents ? (
+              {/* Change due / Remaining Banner — fresh charge total, same basis as canCharge/doCharge */}
+              {cash.covered ? (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 p-3 text-center">
                   <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
                     Change Due to Customer
                   </span>
                   <p className="text-2xl font-black text-emerald-600 tabular-nums">
-                    {formatCents(tenderedCents - totals.totalCents)}
+                    {formatCents(cash.changeCents)}
                   </p>
                 </div>
               ) : (
                 <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-center">
                   <span className="text-xs font-medium text-amber-800">
-                    Remaining to Pay: <strong className="font-bold">{formatCents(totals.totalCents - tenderedCents)}</strong>
+                    Remaining to Pay: <strong className="font-bold">{formatCents(cash.remainingCents)}</strong>
                   </span>
                 </div>
               )}
@@ -745,8 +867,9 @@ setCharging(true);
                   </span>
                   {tenders.length > 2 && (
                     <button
+                      type="button"
                       onClick={() => setTenders((prev) => prev.filter((_, j) => j !== i))}
-                      className="shrink-0 px-1 text-[var(--color-text-muted)] hover:text-[var(--color-danger)]"
+                      className="flex min-h-10 min-w-10 shrink-0 items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-danger)]"
                       aria-label={`Remove tender ${i + 1}`}
                     >
                       ✕
@@ -755,21 +878,22 @@ setCharging(true);
                 </div>
               ))}
               <button
+                type="button"
                 onClick={() => setTenders((prev) => [...prev, { method: "QR", amount: "" }])}
                 disabled={tenders.length >= 4}
-                className="w-full rounded-lg border border-dashed border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] disabled:opacity-50"
+                className="min-h-10 w-full rounded-lg border border-dashed border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] disabled:opacity-50"
               >
                 + Add tender
               </button>
               <div className="mt-2 h-1.5 rounded-full bg-[var(--color-surface-hover)]">
                 <span
                   className="block h-full bg-[var(--color-success)] transition-all"
-                  style={{ width: `${Math.min(100, totals.totalCents > 0 ? (splitSum / totals.totalCents) * 100 : 0)}%` }}
+                  style={{ width: `${Math.min(100, chargeTotal > 0 ? (splitSum / chargeTotal) * 100 : 0)}%` }}
                 />
               </div>
               <p className="mt-2 text-sm tabular-nums" style={{ color: splitRemaining > 0 ? "var(--color-text-muted)" : splitRemaining < 0 ? "var(--color-danger)" : "var(--color-success)" }}>
                 {splitRemaining > 0
-                  ? `${formatCents(splitSum)} / ${formatCents(totals.totalCents)}`
+                  ? `${formatCents(splitSum)} / ${formatCents(chargeTotal)}`
                   : splitRemaining < 0
                     ? `Change ${formatCents(-splitRemaining)}`
                     : "Covered"}
@@ -782,16 +906,14 @@ setCharging(true);
           <div className="mt-4 flex gap-2">
             <Button variant="ghost" full onClick={() => setPayOpen(false)}>Cancel</Button>
             <Button variant="primary" size="lg" full onClick={() => void doCharge()} loading={charging} disabled={!canCharge}>
-              {payTab === "CASH" && tenderedCents < totals.totalCents
-                ? "Enter amount"
-                : `Confirm ${formatCents(totals.totalCents)}`}
+              {payTab === "CASH" ? cashConfirmLabel(tenderedCents, chargeTotal) : `Confirm ${formatCents(chargeTotal)}`}
             </Button>
           </div>
         </Modal>
       ) : null}
 
       {receipt ? (
-        <Modal title=" " onClose={() => setReceipt(null)}>
+        <Modal title="Receipt" onClose={() => setReceipt(null)}>
           <div className="receipt-print text-center">
             <span className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-[var(--color-success)]/10 text-xl text-[var(--color-success)]">✓</span>
             <p className="text-sm tabular-nums text-[var(--color-text-muted)]">{receipt.orderNumber}</p>

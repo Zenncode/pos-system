@@ -10,11 +10,11 @@
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "bai/glm-5.3-flash",
-  "small_model": "bai/glm-5.3-flash",
+  "model": "opencode/muse-spark-1.3-contributor-free",
+  "small_model": "opencode/nemotron-3.5-lightning-free",
   "default_agent": "orchestrator",
   "instructions": ["AGENTIC_SUBAGENT.md"],
-  "enabled_providers": ["bai", "opencode"]
+  "enabled_providers": ["opencode"]
 }
 ```
 
@@ -38,23 +38,23 @@ bun.lock
 .gitignore
 ```
 
-5. After writing all files (§8): run `npm install` inside `.opencode/`, then quit + restart opencode (config loads once at startup). Verify with `/models` — you should see the `opencode/*-free` + `bai/*` IDs.
+5. After writing all files (§8): run `npm install` inside `.opencode/`, then quit + restart opencode (config loads once at startup). Verify with `/models` — you should see the 8 `opencode/*` Zen free IDs.
 6. Run a tier: `/tier1`, `/tier2`, `/review` — or invoke one agent directly, e.g. `@unit-ai review diff main...HEAD`.
 
 **Privacy rule (all models, all tiers):** test users + seeded data only — never production secrets or real PII in prompts, logs, or evidence.
 
-### 1.7 Optional bootstrap (B.AI-only, when Zen is not connected yet)
+### 1.7 Optional bootstrap (Zen-free override, when the default pins are exhausted)
 
-Launch-time override — pins the core loop to B.AI free models so the doc can bootstrap itself before Zen keys exist. PowerShell, from the project root:
+Launch-time override — pins the core loop to alternate Zen free models so the doc can bootstrap itself when the default pins are exhausted. PowerShell, from the project root:
 
 ```powershell
 $env:OPENCODE_CONFIG_CONTENT = @'
 {
   "agents": {
-    "orchestrator": { "model": "bai/glm-5.3-flash" },
-    "verifier":     { "model": "bai/qwen3.8-flash" },
-    "reviewer":     { "model": "bai/glm-5.3-flash" },
-    "scout":        { "model": "bai/qwen3.8-flash" }
+    "orchestrator": { "model": "opencode/space-bunny-free" },
+    "verifier":     { "model": "opencode/nemotron-3-ultra-free" },
+    "reviewer":     { "model": "opencode/muse-spark-1.2-contributor-free" },
+    "scout":        { "model": "opencode/big-pickle" }
   }
 }
 '@
@@ -63,17 +63,17 @@ opencode --auto on AGENTIC_SUBAGENT.md
 ```
 
 - `OPENCODE_CONFIG_CONTENT` overrides agent pins for THIS launch only; `builder.yaml` stays the single source of truth and is never edited by the bootstrap.
-- There is no `builder` agent — the 16 agents are orchestrator + 15 workers (§2). Older B.AI-only drafts pinned a phantom one; it is dropped here.
-- `reviewer`/`scout` are deliberately re-pinned to B.AI in this mode (coherent: their `fallbacks` chains already start on B.AI — `agents.reviewer.fallbacks` → `bai/deepseek-v4-flash`, `agents.scout.fallbacks` → `bai/qwen3.8-flash`). Zen-pinned workers exhaust their chains per §3.2 and land on the B.AI `pool` entries (`bai/qwen3.8-flash`, `bai/deepseek-v4-flash`) — degraded but functional.
+- There is no `builder` agent — the 16 agents are orchestrator + 15 workers (§2); it is dropped here.
+- `reviewer`/`scout` are deliberately re-pinned to alternate Zen frees in this mode (coherent: their `fallbacks` chains already include them — `agents.reviewer.fallbacks` → `opencode/muse-spark-1.2-contributor-free`, `agents.scout.fallbacks` → `opencode/big-pickle`). Workers exhaust their chains per §3.2 and land on the Zen `pool` entries — degraded but functional.
 - Once Zen is connected (`/connect`), do NOT use this launcher — start plain `opencode` so the §2 pins apply.
 
 ## 2. AI Model Roster
 
-All models are FREE ($0) — OpenCode Zen `opencode/...` or B.AI `bai/...`.
+All models are FREE ($0) — OpenCode Zen `opencode/...` only.
 
 | # | Agent | Job | File | Model | Tier |
 |---|---|---|---|---|---|
-| 0 | orchestrator | conductor — fans out to workers by tier, merges verdicts; never tests itself | `.opencode/agent/orchestrator.md` | `bai/glm-5.3-flash` | — |
+| 0 | orchestrator | conductor — fans out to workers by tier, merges verdicts; never tests itself | `.opencode/agent/orchestrator.md` | `opencode/muse-spark-1.3-contributor-free` | — |
 | 1 | unit-ai | unit tests + coverage on every push | `.opencode/agent/unit-ai.md` | `opencode/nemotron-3.5-lightning-free` | 1 |
 | 2 | static-ai | lint + secrets + clean-code quality gate | `.opencode/agent/static-ai.md` | `opencode/nemotron-3.5-lightning-free` | 1 |
 | 3 | mutation-ai | Stryker survivors → killer tests (changed files only) | `.opencode/agent/mutation-ai.md` | `opencode/nemotron-3-ultra-free` | 1 |
@@ -81,16 +81,16 @@ All models are FREE ($0) — OpenCode Zen `opencode/...` or B.AI `bai/...`.
 | 5 | scout | pre-flight blast-radius recon + dispatch plan | `.opencode/agent/scout.md` | `opencode/nemotron-3-ultra-free` | 0 |
 | 6 | integration-ai | DB queries, API contracts, queues | `.opencode/agent/integration-ai.md` | `opencode/nemotron-3-ultra-free` | 2 |
 | 7 | smoke-ai | 60s sanity: boot, login, dashboard 200s | `.opencode/agent/smoke-ai.md` | `opencode/nemotron-3.5-lightning-free` | 2 |
-| 8 | regression-ai | diff→test risk ranking + flaky detection | `.opencode/agent/regression-ai.md` | `opencode/mimo-v2.5-free` | 2+3 |
-| 9 | perf-ai | k6 scripts + p95 tables (API PRs only) | `.opencode/agent/perf-ai.md` | `opencode/mimo-v2.5-free` | 2 |
+| 8 | regression-ai | diff→test risk ranking + flaky detection | `.opencode/agent/regression-ai.md` | `opencode/mimo-v2.6-flash-free` | 2+3 |
+| 9 | perf-ai | k6 scripts + p95 tables (API PRs only) | `.opencode/agent/perf-ai.md` | `opencode/mimo-v2.6-flash-free` | 2 |
 | 10 | security-ai | ZAP/Nuclei triage (staging only) | `.opencode/agent/security-ai.md` | `opencode/nemotron-3-ultra-free` | 2 |
 | 11 | e2e-ai | Playwright/Cypress log triage (text logs only — no vision) | `.opencode/agent/e2e-ai.md` | `opencode/muse-spark-1.3-contributor-free` | 3 |
 | 12 | acceptance-ai | ticket criterion → evidence, strict PASS/FAIL | `.opencode/agent/acceptance-ai.md` | `opencode/muse-spark-1.3-contributor-free` | 3 |
 | 13 | experiment-ai | feature-flag review (flag touched only) | `.opencode/agent/experiment-ai.md` | `opencode/big-pickle` | 3 |
-| 14 | verifier | final gate — evidence + ratchet re-check, veto wins | `.opencode/agent/verifier.md` | `bai/qwen3.8-flash` | verify |
+| 14 | verifier | final gate — evidence + ratchet re-check, veto wins | `.opencode/agent/verifier.md` | `opencode/space-bunny-free` | verify |
 | 15 | employee | employee management — CRUD, shifts, roles, time tracking for POS | `.opencode/agent/employee.md` | `opencode/muse-spark-1.3-contributor-free` | — |
 
-Spare free IDs (fallback pool, in preference order): `opencode/nemotron-3.5-lightning-free`, `opencode/nemotron-3-ultra-free`, `opencode/muse-spark-1.3-contributor-free`, `opencode/muse-spark-1.2-contributor-free`, `opencode/mimo-v2.5-free`, `opencode/big-pickle`, `opencode/ling-3.0-flash-fin-free`, `opencode/deepseek-v4-flash-free`, `opencode/laguna-s-2.1-free`, `bai/qwen3.8-flash`, `bai/deepseek-v4-flash`.
+Spare free IDs (fallback pool, in preference order): `opencode/nemotron-3.5-lightning-free`, `opencode/nemotron-3-ultra-free`, `opencode/muse-spark-1.3-contributor-free`, `opencode/muse-spark-1.2-contributor-free`, `opencode/mimo-v2.6-flash-free`, `opencode/big-pickle`, `opencode/ling-3.0-flash-fin-free`, `opencode/space-bunny-free`.
 
 ## 3. Tiers, fallback, polish loop
 
@@ -137,29 +137,29 @@ The code is never "good enough" until it's green. The orchestrator and every wor
 ## 4. `builder.yaml` (verbatim — single source of truth for models)
 
 ```yaml
-# AI Builder — single source of truth for models (all $0 via OpenCode Zen + B.AI)
+# AI Builder — single source of truth for models (all $0 via OpenCode Zen)
 # Generates: opencode.json + .opencode/agent/*.md model pins
-# Source: AGENTIC_SUBAGENT.md § AI Model Roster (2026-09-04)
+# Source: AGENTIC_SUBAGENT.md § AI Model Roster (2026-09-25)
 # After editing: quit + restart opencode (config loads once at startup)
 
 version: 2
 
 project:
-  main: bai/glm-5.3-flash
+  main: opencode/muse-spark-1.3-contributor-free
   # If the main model's usage runs out: edit opencode.json → "model"/"small_model"
   # to the next entry below, then quit + restart opencode (config is startup-only).
   main_fallbacks:
-    - bai/qwen3.8-flash
-    - bai/deepseek-v4-flash
-    - opencode/muse-spark-1.3-contributor-free
+    - opencode/space-bunny-free
     - opencode/muse-spark-1.2-contributor-free
+    - opencode/nemotron-3-ultra-free
+    - opencode/big-pickle
   small: opencode/nemotron-3.5-lightning-free
   small_fallbacks:
-    - opencode/deepseek-v4-flash-free
     - opencode/ling-3.0-flash-fin-free
-    - opencode/muse-spark-1.3-contributor-free
+    - opencode/mimo-v2.6-flash-free
+    - opencode/space-bunny-free
   default_agent: orchestrator
-  enabled_providers: [bai, opencode]
+  enabled_providers: [opencode]
 
 # ── Fallback policy (usage run out) ─────────────────────────────────────────
 fallback_policy:
@@ -176,18 +176,16 @@ fallback_policy:
   all_exhausted: BLOCKED    # every free model exhausted → 🔴 BLOCKED (model exhaustion), stop — never merge on incomplete tiers
 
 # Global pool — all free models available for fallback, general preference order
+# (live `opencode models` Zen free set, 2026-09-25 — 8 models, Zen-only)
 pool:
   - opencode/nemotron-3.5-lightning-free   # fastest
   - opencode/nemotron-3-ultra-free         # heaviest reasoner
   - opencode/muse-spark-1.3-contributor-free
   - opencode/muse-spark-1.2-contributor-free
-  - opencode/mimo-v2.5-free
+  - opencode/mimo-v2.6-flash-free
   - opencode/big-pickle
   - opencode/ling-3.0-flash-fin-free
-  - opencode/deepseek-v4-flash-free
-  - opencode/laguna-s-2.1-free
-  - bai/qwen3.8-flash                      # B.AI free (orchestrator alternates, last resort)
-  - bai/deepseek-v4-flash                  # B.AI free (orchestrator alternates, last resort)
+  - opencode/space-bunny-free
 
 # Tier 0 = pre-flight recon | Tier 1 = every PR, parallel | Tier 2 = after Tier 1 green | Tier 3 = human assist
 tiers:
@@ -201,31 +199,29 @@ tiers:
 # toward models that still fit the role (speed for fast workers, reasoning for deep ones).
 agents:
   orchestrator:
-    model: bai/glm-5.3-flash
+    model: opencode/muse-spark-1.3-contributor-free
     fallbacks:
-      - bai/qwen3.8-flash
-      - bai/deepseek-v4-flash
-      - opencode/muse-spark-1.3-contributor-free
+      - opencode/space-bunny-free
       - opencode/muse-spark-1.2-contributor-free
+      - opencode/nemotron-3-ultra-free
+      - opencode/big-pickle
     mode: primary
     tier: orchestrator
     why: best free generalist, conductor only — never tests itself
   scout:
     model: opencode/nemotron-3-ultra-free
     fallbacks:
-      - bai/qwen3.8-flash              # B.AI cross-fallback (previous pin, fastest)
-      - opencode/big-pickle
       - opencode/muse-spark-1.3-contributor-free
-      - opencode/laguna-s-2.1-free
+      - opencode/big-pickle
+      - opencode/space-bunny-free
     mode: subagent
     tier: 0
     why: heaviest free reasoner, pre-flight recon — blast-radius map + dispatch plan before any tier
   static-ai:
     model: opencode/nemotron-3.5-lightning-free
     fallbacks:
-      - opencode/deepseek-v4-flash-free
       - opencode/ling-3.0-flash-fin-free
-      - opencode/mimo-v2.5-free
+      - opencode/mimo-v2.6-flash-free
       - opencode/nemotron-3-ultra-free
     mode: subagent
     tier: 1
@@ -233,9 +229,8 @@ agents:
   unit-ai:
     model: opencode/nemotron-3.5-lightning-free
     fallbacks:
-      - opencode/deepseek-v4-flash-free
       - opencode/ling-3.0-flash-fin-free
-      - opencode/mimo-v2.5-free
+      - opencode/mimo-v2.6-flash-free
       - opencode/nemotron-3-ultra-free
     mode: subagent
     tier: 1
@@ -245,8 +240,7 @@ agents:
     fallbacks:
       - opencode/big-pickle
       - opencode/muse-spark-1.3-contributor-free
-      - opencode/deepseek-v4-flash-free
-      - opencode/laguna-s-2.1-free
+      - opencode/space-bunny-free
     mode: subagent
     tier: 1
     scope: changed-files-only
@@ -254,10 +248,9 @@ agents:
   reviewer:
     model: opencode/muse-spark-1.3-contributor-free
     fallbacks:
-      - bai/deepseek-v4-flash          # B.AI cross-fallback (DeepSeek code-reasoning)
       - opencode/muse-spark-1.2-contributor-free
       - opencode/big-pickle
-      - opencode/laguna-s-2.1-free
+      - opencode/space-bunny-free
     mode: subagent
     tier: 1
     why: best free generalist judgment, human-style logic/design/API review every PR
@@ -267,7 +260,6 @@ agents:
       - opencode/muse-spark-1.3-contributor-free
       - opencode/muse-spark-1.2-contributor-free
       - opencode/big-pickle
-      - opencode/laguna-s-2.1-free
     mode: subagent
     tier: 2
     why: holds schema + migration + API contract context
@@ -275,25 +267,23 @@ agents:
     model: opencode/nemotron-3.5-lightning-free
     fallbacks:
       - opencode/ling-3.0-flash-fin-free
-      - opencode/deepseek-v4-flash-free
-      - opencode/mimo-v2.5-free
+      - opencode/mimo-v2.6-flash-free
+      - opencode/muse-spark-1.3-contributor-free
     mode: subagent
     tier: 2
     why: cheapest/fastest, <60s boot+login+dashboard check
   regression-ai:
-    model: opencode/mimo-v2.5-free
+    model: opencode/mimo-v2.6-flash-free
     fallbacks:
       - opencode/muse-spark-1.3-contributor-free
-      - opencode/deepseek-v4-flash-free
       - opencode/nemotron-3.5-lightning-free
-      - opencode/laguna-s-2.1-free
+      - opencode/space-bunny-free
     mode: subagent
     tier: 2
     why: diff-to-test ranking + flaky detection
   perf-ai:
-    model: opencode/mimo-v2.5-free
+    model: opencode/mimo-v2.6-flash-free
     fallbacks:
-      - opencode/deepseek-v4-flash-free
       - opencode/ling-3.0-flash-fin-free
       - opencode/muse-spark-1.3-contributor-free
       - opencode/nemotron-3.5-lightning-free
@@ -305,9 +295,8 @@ agents:
     model: opencode/nemotron-3-ultra-free
     fallbacks:
       - opencode/big-pickle
+      - opencode/space-bunny-free
       - opencode/muse-spark-1.3-contributor-free
-      - opencode/laguna-s-2.1-free
-      - opencode/deepseek-v4-flash-free
     mode: subagent
     tier: 2
     why: CVE triage, ZAP/Nuclei noise filter
@@ -315,8 +304,7 @@ agents:
     model: opencode/muse-spark-1.3-contributor-free
     fallbacks:
       - opencode/muse-spark-1.2-contributor-free
-      - opencode/mimo-v2.5-free
-      - opencode/deepseek-v4-flash-free
+      - opencode/mimo-v2.6-flash-free
       - opencode/nemotron-3.5-lightning-free
     mode: subagent
     tier: 3
@@ -325,9 +313,8 @@ agents:
     model: opencode/muse-spark-1.3-contributor-free
     fallbacks:
       - opencode/muse-spark-1.2-contributor-free
-      - opencode/laguna-s-2.1-free
-      - opencode/mimo-v2.5-free
-      - opencode/deepseek-v4-flash-free
+      - opencode/mimo-v2.6-flash-free
+      - opencode/ling-3.0-flash-fin-free
     mode: subagent
     tier: 3
     why: strict ticket-criterion to evidence mapping
@@ -336,29 +323,27 @@ agents:
     fallbacks:
       - opencode/ling-3.0-flash-fin-free
       - opencode/muse-spark-1.3-contributor-free
-      - opencode/mimo-v2.5-free
+      - opencode/mimo-v2.6-flash-free
       - opencode/nemotron-3-ultra-free
     mode: subagent
     tier: 3
     when: feature-flag-touched-only
     why: flag bucketing logic; Ling fallback for stats math
   verifier:
-    model: bai/qwen3.8-flash
+    model: opencode/space-bunny-free
     fallbacks:
-      - bai/deepseek-v4-flash          # B.AI sibling (cross-fallback within provider)
       - opencode/nemotron-3-ultra-free
       - opencode/big-pickle
       - opencode/muse-spark-1.3-contributor-free
     mode: subagent
     tier: verify
-    why: fast B.AI flash (GLM sibling), final evidence + ratchet gate, runs last
+    why: fast Zen free final gate — evidence + ratchet check, runs last
   employee:
     model: opencode/muse-spark-1.3-contributor-free
     fallbacks:
       - opencode/muse-spark-1.2-contributor-free
       - opencode/big-pickle
-      - opencode/deepseek-v4-flash-free
-      - opencode/laguna-s-2.1-free
+      - opencode/space-bunny-free
     mode: subagent
     tier: build
     scope: employee-management
@@ -372,12 +357,12 @@ sides:
       designer: opencode/muse-spark-1.3-contributor-free
       designer_fallbacks:
         - opencode/muse-spark-1.2-contributor-free
-        - opencode/laguna-s-2.1-free
+        - opencode/space-bunny-free
       fast-iterator: opencode/nemotron-3.5-lightning-free
       fast-iterator_fallbacks:
-        - opencode/deepseek-v4-flash-free
+        - opencode/mimo-v2.6-flash-free
         - opencode/ling-3.0-flash-fin-free
-      consistency: opencode/mimo-v2.5-free
+      consistency: opencode/mimo-v2.6-flash-free
       consistency_fallbacks:
         - opencode/muse-spark-1.3-contributor-free
         - opencode/nemotron-3.5-lightning-free
@@ -398,7 +383,7 @@ Directory: `.opencode/agent/`. Files: `acceptance-ai.md`, `e2e-ai.md`, `employee
 
 | file | mode | permission | model (verbatim) |
 |---|---|---|---|
-| orchestrator.md | `primary` | *(none)* | `bai/glm-5.3-flash` |
+| orchestrator.md | `primary` | *(none)* | `opencode/muse-spark-1.3-contributor-free` |
 | scout.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/nemotron-3-ultra-free` |
 | static-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/nemotron-3.5-lightning-free` |
 | unit-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/nemotron-3.5-lightning-free` |
@@ -406,19 +391,19 @@ Directory: `.opencode/agent/`. Files: `acceptance-ai.md`, `e2e-ai.md`, `employee
 | reviewer.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/muse-spark-1.3-contributor-free` |
 | integration-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/nemotron-3-ultra-free` |
 | smoke-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/nemotron-3.5-lightning-free` |
-| regression-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/mimo-v2.5-free` |
-| perf-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/mimo-v2.5-free` |
+| regression-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/mimo-v2.6-flash-free` |
+| perf-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/mimo-v2.6-flash-free` |
 | security-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/nemotron-3-ultra-free` |
 | e2e-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/muse-spark-1.3-contributor-free` |
 | acceptance-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/muse-spark-1.3-contributor-free` |
 | experiment-ai.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/big-pickle` |
-| verifier.md | `subagent` | `edit: deny` / `bash: allow` | `bai/qwen3.8-flash` |
+| verifier.md | `subagent` | `edit: deny` / `bash: allow` | `opencode/space-bunny-free` |
 | employee.md | `subagent` | `edit: allow` / `bash: allow` | `opencode/muse-spark-1.3-contributor-free` |
 
 Each agent file starts with a one-line `description:` frontmatter field — the trigger sentence, pattern `<Role> — <what it does>. Use <when>.` (≤30 words). The 16 verbatim values:
 
 ```text
-orchestrator:    Main orchestrator on B.AI GLM-5.3 Flash — fans out code-review work to the 14 free worker subagents (Zen + B.AI) by tier (scout → gates → verify), then merges verdicts. Use for /tier1, /tier2, /review or any full-review request.
+orchestrator:    Main orchestrator on Zen Muse Spark 1.3 — fans out code-review work to the free Zen worker subagents by tier (scout → gates → verify), then merges verdicts. Use for /tier1, /tier2, /review or any full-review request.
 scout:           Pre-flight recon scout — maps blast radius of a diff before any tier runs (routing, risk ranking, test discovery, missing-infrastructure detection). Use FIRST on every review, before Tier 1.
 static-ai:       Static analysis explainer — lints diff, explains ESLint/TypeScript/Sonar issues with autofixes. Use on every PR.
 unit-ai:         Unit test reviewer — checks new functions have passing tests with null/empty/boundary edge cases. Use when reviewing a PR diff for unit coverage.
@@ -482,12 +467,12 @@ Rules:
 
 ````markdown
 ---
-description: Main orchestrator on B.AI GLM-5.3 Flash — fans out code-review work to the 14 free worker subagents (Zen + B.AI) by tier (scout → gates → verify), then merges verdicts. Use for /tier1, /tier2, /review or any full-review request.
+description: Main orchestrator on Zen Muse Spark 1.3 — fans out code-review work to the free Zen worker subagents by tier (scout → gates → verify), then merges verdicts. Use for /tier1, /tier2, /review or any full-review request.
 mode: primary
-model: bai/glm-5.3-flash
+model: opencode/muse-spark-1.3-contributor-free
 ---
 
-You are the orchestrator — the main agent. You run on `bai/glm-5.3-flash` via B.AI. Never send production secrets or real PII — test users + seeded data only.
+You are the orchestrator — the main agent. You run on `opencode/muse-spark-1.3-contributor-free` via OpenCode Zen. Never send production secrets or real PII — test users + seeded data only.
 
 You NEVER do the testing yourself. Your job is (1) build a tailored prompt per worker, (2) dispatch it to the subagent, (3) merge results. Workers are read-only reporters — they output tables + code blocks, they don't edit.
 
@@ -685,7 +670,7 @@ Polish $ARGUMENTS (default: main...HEAD):
 
 ```markdown
 ---
-description: Human review assist (scout recon + reviewer + E2E + acceptance + flag check) — GLM orchestrator fans out to free workers.
+description: Human review assist (scout recon + reviewer + E2E + acceptance + flag check) — Muse Spark orchestrator fans out to free workers.
 agent: orchestrator
 ---
 
@@ -717,7 +702,7 @@ Smoke-check $ARGUMENTS (default: staging):
 
 ```markdown
 ---
-description: Run Tier 1 mandatory checks (static + unit + mutation + reviewer) — GLM orchestrator fans out to free workers.
+description: Run Tier 1 mandatory checks (static + unit + mutation + reviewer) — Muse Spark orchestrator fans out to free workers.
 agent: orchestrator
 ---
 
@@ -734,7 +719,7 @@ Run Tier 1 on diff $ARGUMENTS (default: main...HEAD):
 
 ```markdown
 ---
-description: Run Tier 2 required checks (integration + smoke + regression) — GLM orchestrator fans out to free workers.
+description: Run Tier 2 required checks (integration + smoke + regression) — Muse Spark orchestrator fans out to free workers.
 agent: orchestrator
 ---
 
@@ -785,7 +770,7 @@ Scope: `app/**` (or `src/**`), `config/**`, `middleware/**`, `schemas/**`, `migr
 | conductor | orchestrator | `opencode/muse-spark-1.3-contributor-free` |
 | lint / unit / smoke | static-ai, unit-ai, smoke-ai | `opencode/nemotron-3.5-lightning-free` |
 | mutants / contracts / security | mutation-ai, integration-ai, security-ai | `opencode/nemotron-3-ultra-free` |
-| regression / perf | regression-ai, perf-ai | `opencode/mimo-v2.5-free` |
+| regression / perf | regression-ai, perf-ai | `opencode/mimo-v2.6-flash-free` |
 | e2e / acceptance | e2e-ai, acceptance-ai | `opencode/muse-spark-1.3-contributor-free` |
 | flags | experiment-ai | `opencode/big-pickle` |
 
@@ -813,12 +798,12 @@ Scope: `src/**` (pages, routes, components, styles, services).
 | conductor | orchestrator | `opencode/muse-spark-1.3-contributor-free` |
 | lint / unit / smoke / fast-iterate | static-ai, unit-ai, smoke-ai | `opencode/nemotron-3.5-lightning-free` |
 | mutants / contracts / security / a11y | mutation-ai, integration-ai, security-ai | `opencode/nemotron-3-ultra-free` |
-| regression / perf / consistency | regression-ai, perf-ai | `opencode/mimo-v2.5-free` |
+| regression / perf / consistency | regression-ai, perf-ai | `opencode/mimo-v2.6-flash-free` |
 | e2e / acceptance / designer | e2e-ai, acceptance-ai | `opencode/muse-spark-1.3-contributor-free` |
 | flags | experiment-ai | `opencode/big-pickle` |
 | uiux-designer | uiux.designer | `opencode/muse-spark-1.3-contributor-free` |
 | uiux-iterate | uiux.fast-iterator | `opencode/nemotron-3.5-lightning-free` |
-| uiux-consistency | uiux.consistency | `opencode/mimo-v2.5-free` |
+| uiux-consistency | uiux.consistency | `opencode/mimo-v2.6-flash-free` |
 | uiux-a11y | uiux.a11y-check | `opencode/nemotron-3-ultra-free` |
 
 Rules:
@@ -862,7 +847,7 @@ Rules:
 3. Write the 15 review agent files: frontmatter per §5.1 (mode, permission, model, description); body = §5.3/§5.4 verbatim where given, else the §5.2 skeleton instantiated from the agent's §5.4 Do/Output/Special.
 4. Write the 7 review command files (§6) and 2 skills (§7) verbatim, plus the 2 builder agents + 2 builder commands (§9).
 5. `npm install` inside `.opencode/` → materializes `node_modules/` + `package-lock.json`.
-6. Quit + restart opencode; `/models` must list the `bai/*` + `opencode/*-free` IDs. `/app` must route to `@app` (Muse Spark), `/api` to `@api` (Nemotron Ultra).
+6. Quit + restart opencode; `/models` must list the 8 `opencode/*` Zen free IDs. `/app` must route to `@app` (Muse Spark), `/api` to `@api` (Nemotron Ultra).
 
 ### 8.3 Verify the build
 
@@ -915,7 +900,7 @@ When you open `/` (the root), the following agents are currently active and thei
 
 | Agent | Status | Model | Last Action |
 |-------|--------|-------|-------------|
-| orchestrator | idle/active | `bai/glm-5.3-flash` | — |
+| orchestrator | idle/active | `opencode/muse-spark-1.3-contributor-free` | — |
 | scout | idle/active | `opencode/nemotron-3-ultra-free` | — |
 | static-ai | idle/active | `opencode/nemotron-3.5-lightning-free` | — |
 | unit-ai | idle/active | `opencode/nemotron-3.5-lightning-free` | — |
@@ -923,13 +908,13 @@ When you open `/` (the root), the following agents are currently active and thei
 | reviewer | idle/active | `opencode/muse-spark-1.3-contributor-free` | — |
 | integration-ai | idle/active | `opencode/nemotron-3-ultra-free` | — |
 | smoke-ai | idle/active | `opencode/nemotron-3.5-lightning-free` | — |
-| regression-ai | idle/active | `opencode/mimo-v2.5-free` | — |
-| perf-ai | idle/active | `opencode/mimo-v2.5-free` | — |
+| regression-ai | idle/active | `opencode/mimo-v2.6-flash-free` | — |
+| perf-ai | idle/active | `opencode/mimo-v2.6-flash-free` | — |
 | security-ai | idle/active | `opencode/nemotron-3-ultra-free` | — |
 | e2e-ai | idle/active | `opencode/muse-spark-1.3-contributor-free` | — |
 | acceptance-ai | idle/active | `opencode/muse-spark-1.3-contributor-free` | — |
 | experiment-ai | idle/active | `opencode/big-pickle` | — |
-| verifier | idle/active | `bai/qwen3.8-flash` | — |
+| verifier | idle/active | `opencode/space-bunny-free` | — |
 
 **Status meanings:**
 - `idle` — agent is waiting for a new request

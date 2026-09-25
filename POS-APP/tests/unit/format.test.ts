@@ -1,6 +1,6 @@
-// Money-math unit tests — Node built-in runner, zero new deps.
+// Money-math unit tests — Vitest runner (Vite resolver handles extensionless lib imports).
 // Run: npm run test:unit
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import assert from "node:assert/strict";
 import { calcLineTax, formatCents, parseToCents } from "../../app/lib/format.ts";
 

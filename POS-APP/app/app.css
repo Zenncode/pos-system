@@ -2,7 +2,7 @@
 @import "./styles/tokens.css";
 
 @theme {
-  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --color-accent: #059669;
   --color-accent-dark: #047857;
   --color-ink: #111827;
@@ -44,40 +44,38 @@ dd.tabular-nums {
   background: transparent;
 }
 
-/* Glassmorphism and modern surfaces */
+/* Flat surfaces (flat POS direction: 1px hairlines, no blur, no glow).
+   The legacy `glass-*` class names are kept as flat aliases so existing
+   secondary screens keep rendering while the shell stays flat. */
 .glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
 }
 
 .glass-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
-  transition: box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
 }
 
 .glass-card:hover {
-  box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 6px -2px rgb(0 0 0 / 0.05);
+  border-color: var(--color-neutral-300);
 }
 
 .glow-emerald {
-  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.35);
+  box-shadow: none;
 }
 
-/* Micro-animations and interactive feedback */
+/* Restrained interactive feedback (color/border only; press feedback lives
+   on .pos-tile per the register spec) */
 button {
-  transition: all 140ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-button:active:not(:disabled) {
-  transform: scale(0.98);
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 
-/* Focus visibility for keyboard cashiers */
+/* Visible keyboard focus for cashiers — single source, semantic token */
+:focus:not(:focus-visible) { outline: none; }
 :focus-visible {
-  outline: 2px solid #10b981;
+  outline: 2px solid var(--color-primary-focus);
   outline-offset: 2px;
 }
 
@@ -97,14 +95,13 @@ button:active:not(:disabled) {
   box-shadow: 0 1px 1px 0 rgba(0,0,0,0.05);
 }
 .pos-tile {
-  transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 150ms ease, background-color 150ms ease;
 }
 .pos-tile:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.09);
+  border-color: var(--color-primary);
 }
-.pos-tile:active {
-  transform: scale(0.97);
+.pos-tile:active:not(:disabled) {
+  transform: scale(0.98);
 }
 @keyframes pos-rise {
   from { transform: translateY(8px); opacity: 0.5; }
@@ -113,9 +110,17 @@ button:active:not(:disabled) {
 .pos-sheet {
   animation: pos-rise 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
+/* Reduced motion — single block: component overrides first, then the
+   global kill-switch (moved from deleted styles/globals.css). */
 @media (prefers-reduced-motion: reduce) {
   .pos-sheet { animation: none; }
-  .pos-tile:active { transform: none; }
+  .pos-tile, .pos-tile:hover, .pos-tile:active { transform: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Receipt printing (FR-29): hide the app chrome, print only the receipt body */
@@ -139,19 +144,5 @@ button:active:not(:disabled) {
   }
   .no-print {
     display: none !important;
-  }
-}
-
-/* Focus-visible polyfill baseline (moved from deleted styles/globals.css) */
-:focus:not(:focus-visible) { outline: none; }
-:focus-visible { outline: 2px solid var(--color-primary-focus); outline-offset: 2px; }
-
-/* Reduced motion (moved from deleted styles/globals.css) */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }

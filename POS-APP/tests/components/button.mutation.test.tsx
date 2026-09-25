@@ -14,10 +14,44 @@ describe("Button — mutation killers", () => {
     expect(screen.getByRole("button", { name: "Save" })).toHaveClass("bg-[var(--color-primary)]");
   });
 
+  // Kills: danger variant string literal mutant
+  it("renders danger variant with correct class", () => {
+    render(<Button variant="danger">Delete</Button>);
+    expect(screen.getByRole("button", { name: "Delete" })).toHaveClass("bg-[var(--color-danger)]");
+  });
+
+  // Kills: secondary + ghost variant string literal mutants
+  it("renders secondary variant with correct class", () => {
+    render(<Button variant="secondary">Cancel</Button>);
+    expect(screen.getByRole("button", { name: "Cancel" })).toHaveClass("bg-[var(--color-bg)]");
+  });
+
+  it("renders ghost variant with correct class", () => {
+    render(<Button variant="ghost">More options</Button>);
+    expect(screen.getByRole("button", { name: "More options" })).toHaveClass("text-[var(--color-text-muted)]");
+  });
+
   // Kills: size string literal mutants (sm/md/lg)
   it("renders lg size with correct class", () => {
     render(<Button size="lg">Save</Button>);
     expect(screen.getByRole("button", { name: "Save" })).toHaveClass("h-12");
+  });
+
+  // Kills: sm keeps the 40px minimum cashier/touch target (h-10 min-w-10)
+  it("renders sm size with 40px touch-target classes", () => {
+    render(<Button size="sm">Save</Button>);
+    const btn = screen.getByRole("button", { name: "Save" });
+    expect(btn).toHaveClass("h-10");
+    expect(btn).toHaveClass("min-w-10");
+    expect(btn).toHaveClass("px-3");
+  });
+
+  // Kills: md default size string literal mutant (md: "h-10 px-4 text-sm" -> "")
+  it("renders md default size with correct classes", () => {
+    render(<Button>Save</Button>);
+    const btn = screen.getByRole("button", { name: "Save" });
+    expect(btn).toHaveClass("h-10");
+    expect(btn).toHaveClass("px-4");
   });
 
   // Kills: loading disables + aria-busy + suppresses icon + spinner decorative

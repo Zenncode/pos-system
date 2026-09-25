@@ -1,5 +1,5 @@
 ---
-description: Run Tier 2 required checks (integration + smoke + regression) — GLM orchestrator fans out to free workers.
+description: Run Tier 2 required checks (integration + smoke + regression) — Muse Spark orchestrator fans out to free workers.
 agent: orchestrator
 ---
 

@@ -18,7 +18,7 @@ export function ProductTile({ product, onAdd }: Props): JSX.Element {
       onClick={() => onAdd(product)}
       disabled={out}
       title={out ? `${product.name} — out of stock` : `Add ${product.name} to cart`}
-      className="pos-tile group relative flex h-full min-h-[120px] flex-col justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-left hover:border-[var(--color-primary)] hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-focus)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none transition-all"
+      className="pos-tile group relative flex h-full min-h-[120px] flex-col justify-between rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-left hover:border-[var(--color-primary)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-focus)] disabled:cursor-not-allowed disabled:opacity-60"
     >
       <div>
         <p className="truncate text-sm font-semibold text-[var(--color-text)] group-hover:text-emerald-950 transition-colors">

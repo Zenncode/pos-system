@@ -1,6 +1,6 @@
 // Unit tests for pure POS business rules (app/lib/posRules.ts).
-// Run with: npm run test:unit (node --test).
-import { test } from "node:test";
+// Run with: npm run test:unit (vitest).
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import {
   DENOMINATIONS_CENTS,

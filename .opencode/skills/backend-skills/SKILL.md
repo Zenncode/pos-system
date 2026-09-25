@@ -12,7 +12,7 @@ Scope: `app/**` (or `src/**`), `config/**`, `middleware/**`, `schemas/**`, `migr
 | conductor | orchestrator | `opencode/muse-spark-1.3-contributor-free` |
 | lint / unit / smoke | static-ai, unit-ai, smoke-ai | `opencode/nemotron-3.5-lightning-free` |
 | mutants / contracts / security | mutation-ai, integration-ai, security-ai | `opencode/nemotron-3-ultra-free` |
-| regression / perf | regression-ai, perf-ai | `opencode/mimo-v2.5-free` |
+| regression / perf | regression-ai, perf-ai | `opencode/mimo-v2.6-flash-free` |
 | e2e / acceptance | e2e-ai, acceptance-ai | `opencode/muse-spark-1.3-contributor-free` |
 | flags | experiment-ai | `opencode/big-pickle` |
 
