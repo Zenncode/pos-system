@@ -1,0 +1,418 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for lib/demoData.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">lib</a> demoData.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>7/7</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>4/4</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>1/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>7/7</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Seeded demo catalog — used when the API is unreachable so the POS
+// stays fully functional offline. Test data only, no real PII.
+import type { Category, Customer, Order, Product, StaffUser } from "../types";
+&nbsp;
+export const DEMO_CATEGORIES: Category[] = [
+  { id: "cat-coffee", name: "Coffee", productCount: 4 },
+  { id: "cat-pastry", name: "Pastry", productCount: 4 },
+  { id: "cat-merch", name: "Merch", productCount: 3 },
+  { id: "cat-grocery", name: "Grocery", productCount: 3 },
+];
+&nbsp;
+export const DEMO_PRODUCTS: Product[] = [
+  { id: "p-espresso", sku: "CF-001", barcode: "100001", name: "Espresso", categoryId: "cat-coffee", priceCents: 8000, costCents: 2500, taxRateBps: 1000, stock: 48, lowStockThreshold: 5, isActive: true },
+  { id: "p-latte", sku: "CF-002", barcode: "100002", name: "Cafe Latte", categoryId: "cat-coffee", priceCents: 14000, costCents: 4200, taxRateBps: 1000, stock: 36, lowStockThreshold: 5, isActive: true },
+  { id: "p-cappuccino", sku: "CF-003", barcode: "100003", name: "Cappuccino", categoryId: "cat-coffee", priceCents: 15000, costCents: 4500, taxRateBps: 1000, stock: 4, lowStockThreshold: 5, isActive: true },
+  { id: "p-coldbrew", sku: "CF-004", barcode: "100004", name: "Cold Brew", categoryId: "cat-coffee", priceCents: 16000, costCents: 4800, taxRateBps: 1000, stock: 22, lowStockThreshold: 5, isActive: true },
+  { id: "p-croissant", sku: "PA-001", barcode: "200001", name: "Butter Croissant", categoryId: "cat-pastry", priceCents: 9500, costCents: 3200, taxRateBps: 1000, stock: 18, lowStockThreshold: 6, isActive: true },
+  { id: "p-banana-bread", sku: "PA-002", barcode: "200002", name: "Banana Bread", categoryId: "cat-pastry", priceCents: 11000, costCents: 3800, taxRateBps: 1000, stock: 12, lowStockThreshold: 6, isActive: true },
+  { id: "p-ensaymada", sku: "PA-003", barcode: "200003", name: "Ensaymada", categoryId: "cat-pastry", priceCents: 6500, costCents: 2200, taxRateBps: 1000, stock: 3, lowStockThreshold: 6, isActive: true },
+  { id: "p-cheesecake", sku: "PA-004", barcode: "200004", name: "Cheesecake Slice", categoryId: "cat-pastry", priceCents: 18000, costCents: 6500, taxRateBps: 1000, stock: 9, lowStockThreshold: 4, isActive: true },
+  { id: "p-mug", sku: "MC-001", barcode: "300001", name: "Store Mug", categoryId: "cat-merch", priceCents: 35000, costCents: 13000, taxRateBps: 1000, stock: 15, lowStockThreshold: 3, isActive: true },
+  { id: "p-tumbler", sku: "MC-002", barcode: "300002", name: "Tumbler 500ml", categoryId: "cat-merch", priceCents: 55000, costCents: 21000, taxRateBps: 1000, stock: 7, lowStockThreshold: 3, isActive: true },
+  { id: "p-beans", sku: "MC-003", barcode: "300003", name: "House Beans 250g", categoryId: "cat-merch", priceCents: 42000, costCents: 17000, taxRateBps: 0, stock: 20, lowStockThreshold: 5, isActive: true },
+  { id: "p-rice", sku: "GR-001", barcode: "400001", name: "Rice 5kg", categoryId: "cat-grocery", priceCents: 32500, costCents: 26000, taxRateBps: 0, stock: 14, lowStockThreshold: 4, isActive: true },
+  { id: "p-eggs", sku: "GR-002", barcode: "400002", name: "Eggs 12pcs", categoryId: "cat-grocery", priceCents: 11000, costCents: 7900, taxRateBps: 0, stock: 2, lowStockThreshold: 6, isActive: true },
+  { id: "p-milk", sku: "GR-003", barcode: "400003", name: "Fresh Milk 1L", categoryId: "cat-grocery", priceCents: 12000, costCents: 8400, taxRateBps: 0, stock: 25, lowStockThreshold: 8, isActive: true },
+];
+&nbsp;
+export const DEMO_CUSTOMERS: Customer[] = [
+  { id: "c-1", name: "Maria Santos", phone: "09171234567", email: "maria@example.com", loyaltyPoints: 120 },
+  { id: "c-2", name: "Jose Rizal", phone: "09189876543", email: "jose@example.com", loyaltyPoints: 45 },
+  { id: "c-3", name: "Ana Reyes", phone: "09155550123", email: null, loyaltyPoints: 0 },
+];
+&nbsp;
+function demoOrder(n: number, totalCents: number, status: Order["status"]): Order {
+  return {
+    id: `o-demo-${n}`,
+    orderNumber: `ORD-2026091${n}-DEMO${n}`,
+    status,
+    cashierId: "u-demo",
+    cashier: { id: "u-demo", name: "Demo Cashier", email: "cashier@example.com" },
+    customerId: n % 2 === 0 ? "c-1" : null,
+    customer: n % 2 === 0 ? DEMO_CUSTOMERS[0] : null,
+    subtotalCents: totalCents,
+    taxCents: Math.round(totalCents * 0.1),
+    discountCents: 0,
+    totalCents: totalCents + Math.round(totalCents * 0.1),
+    paidCents: totalCents + Math.round(totalCents * 0.1),
+    changeCents: 0,
+    note: null,
+    items: [
+      {
+        id: `oi-${n}-1`,
+        productId: "p-latte",
+        nameSnapshot: "Cafe Latte",
+        skuSnapshot: "CF-002",
+        unitPriceCents: 14000,
+        quantity: 2,
+        lineTotalCents: 28000,
+      },
+    ],
+    payments: [{ id: `pay-${n}`, method: "CASH", amountCents: totalCents, reference: null }],
+    createdAt: new Date(Date.now() - n * 36e5).toISOString(),
+  };
+}
+&nbsp;
+export const DEMO_ORDERS: Order[] = [
+  demoOrder(1, 28000, "PAID"),
+  demoOrder(2, 45000, "PAID"),
+  demoOrder(3, 16000, "VOID"),
+  demoOrder(4, 60000, "PAID"),
+  demoOrder(5, 22000, "PAID"),
+];
+&nbsp;
+export const DEMO_USER = {
+  id: "u-demo",
+  email: "cashier@example.com",
+  name: "Demo Cashier",
+  role: "CASHIER" as const,
+  storeId: "store-demo",
+  isActive: true,
+};
+&nbsp;
+export const DEMO_USERS: StaffUser[] = [
+  {
+    ...DEMO_USER,
+  },
+  {
+    id: "u-admin-1",
+    email: "admin@example.com",
+    name: "Admin User",
+    role: "ADMIN" as const,
+    storeId: "store-admin-1",
+    isActive: true,
+  },
+  {
+    id: "u-manager-1",
+    email: "manager@example.com",
+    name: "Manager User",
+    role: "MANAGER" as const,
+    storeId: "store-manager-1",
+    isActive: true,
+  },
+  {
+    id: "u-cashier-1",
+    email: "cashier2@example.com",
+    name: "Cashier User",
+    role: "CASHIER" as const,
+    storeId: "store-cashier-1",
+    isActive: true,
+  },
+];</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-09-25T10:28:17.633Z
+            </div>
+        <script src="../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../sorter.js"></script>
+        <script src="../block-navigation.js"></script>
+    </body>
+</html>
+    
