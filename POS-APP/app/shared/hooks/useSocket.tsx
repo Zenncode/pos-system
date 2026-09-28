@@ -83,9 +83,8 @@ export function useSocket(options: UseSocketOptions = {}) {
       setConnecting(false);
       setError(null);
 
-      // Join store room for order/stock events
-      const room = storeIdRef.current ? `store:${storeIdRef.current}` : "store:default";
-      socket.emit("join:store", room);
+      // Join store room for order/stock events (server prefixes store:)
+      socket.emit("join:store", storeIdRef.current ?? "");
     });
 
     socket.on("disconnect", (reason) => {

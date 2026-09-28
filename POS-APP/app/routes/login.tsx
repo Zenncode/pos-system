@@ -74,9 +74,9 @@ export default function Login(): JSX.Element | null {
     }
   }
 
-  function quickFill(presetEmail: string, presetPass: string): void {
+  function quickFill(presetEmail: string): void {
     setEmail(presetEmail);
-    setPassword(presetPass);
+    setPassword("");
     setError("");
   }
 
@@ -115,21 +115,21 @@ export default function Login(): JSX.Element | null {
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <button
                   type="button"
-                  onClick={() => quickFill("cashier01@example.com", "Cashier1234!")}
+                  onClick={() => quickFill("cashier01@example.com")}
                   className="rounded-md bg-[var(--color-bg)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)] ring-1 ring-inset ring-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
                 >
                   Cashier 01
                 </button>
                 <button
                   type="button"
-                  onClick={() => quickFill("manager01@example.com", "Manager1234!")}
+                  onClick={() => quickFill("manager01@example.com")}
                   className="rounded-md bg-[var(--color-bg)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)] ring-1 ring-inset ring-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
                 >
                   Manager
                 </button>
                 <button
                   type="button"
-                  onClick={() => quickFill("admin@example.com", "Admin1234!")}
+                  onClick={() => quickFill("admin@example.com")}
                   className="rounded-md bg-[var(--color-bg)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)] ring-1 ring-inset ring-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
                 >
                   Administrator

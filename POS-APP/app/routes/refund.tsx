@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { JSX } from "react";
 import { Navigate, useNavigate } from "react-router";
-import { getOrder, listOrders, voidOrder } from "~/lib/api";
+import { getOrder, listOrders, requestOverride, voidOrder } from "~/lib/api";
 import { formatCents, formatDateTime } from "~/lib/format";
 import { useAuth, roleAtLeast } from "~/shared/hooks/useAuth";
 import { useToast } from "~/shared/hooks/useToast";
@@ -29,8 +29,10 @@ export default function Refund(): JSX.Element {
   const [listError, setListError] = useState("");
   const [detailError, setDetailError] = useState("");
   const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const [reason, setReason] = useState("");
   const [refundBusy, setRefundBusy] = useState(false);
+  const [voidPin, setVoidPin] = useState("");
 
   const allowed = canRefund(user?.role);
 
@@ -39,24 +41,34 @@ export default function Refund(): JSX.Element {
   }, [authLoading, allowed, push]);
 
   useEffect(() => {
-    let alive = true;
-    async function load(): Promise<void> {
-      setLoading(true);
-      setListError("");
-      try {
-        const res = await listOrders({ status: "PAID", q: q.trim() || undefined });
-        if (alive) setOrders(res.data);
-      } catch {
-        if (alive) setListError("Failed to load paid orders. Try again.");
-      } finally {
-        if (alive) setLoading(false);
-      }
+    const t = window.setTimeout(() => setDebouncedQ(q.trim()), 250);
+    return () => window.clearTimeout(t);
+  }, [q]);
+
+  const load = useCallback(async (): Promise<void> => {
+    setLoading(true);
+    setListError("");
+    try {
+      const res = await listOrders({ status: "PAID", q: debouncedQ || undefined });
+      setOrders(res.data);
+    } catch {
+      setListError("Failed to load paid orders. Try again.");
+    } finally {
+      setLoading(false);
     }
-    if (allowed) void load();
+  }, [debouncedQ]);
+
+  useEffect(() => {
+    let alive = true;
+    if (allowed) {
+      void load().finally(() => {
+        if (!alive) return;
+      });
+    }
     return () => {
       alive = false;
     };
-  }, [q, allowed]);
+  }, [allowed, load]);
 
   if (authLoading) return <></>;
 
@@ -80,10 +92,21 @@ export default function Refund(): JSX.Element {
     }
     setRefundBusy(true);
     try {
-      await voidOrder(order.id);
+      let overrideToken: string | undefined;
+      const needsPin = !roleAtLeast(user?.role, "MANAGER");
+      if (needsPin) {
+        if (!/^\d{4,8}$/.test(voidPin)) {
+          push("error", "Enter the manager PIN (4-8 digits).");
+          setRefundBusy(false);
+          return;
+        }
+        overrideToken = await requestOverride(voidPin);
+      }
+      await voidOrder(order.id, overrideToken);
       push("success", `${formatCents(order.totalCents)} refunded (void) for ${order.orderNumber}`);
       setOrder(null);
       setReason("");
+      setVoidPin("");
       navigate("/orders", { replace: true });
     } catch {
       push("error", "Refund failed. Try again.");
@@ -113,7 +136,7 @@ export default function Refund(): JSX.Element {
       {loading ? (
         <Spinner />
       ) : listError ? (
-        <EmptyState title={listError} action={<Button onClick={() => setQ((v) => v)}>Retry</Button>} />
+        <EmptyState title={listError} action={<Button onClick={() => void load()}>Retry</Button>} />
       ) : orders.length === 0 ? (
         <EmptyState title="No paid orders found. Voided orders stay in Orders." />
       ) : (
@@ -164,6 +187,17 @@ export default function Refund(): JSX.Element {
               placeholder="Reason for refund"
               required
             />
+            {!roleAtLeast(user?.role, "MANAGER") ? (
+              <Input
+                label="Manager PIN"
+                type="password"
+                passwordToggle
+                inputMode="numeric"
+                value={voidPin}
+                onChange={(e) => setVoidPin(e.target.value)}
+                placeholder="4-8 digits"
+              />
+            ) : null}
             <Button variant="danger" full type="submit" loading={refundBusy}>
               {`Void + refund ${formatCents(order.totalCents)}`}
             </Button>

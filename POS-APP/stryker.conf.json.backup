@@ -1,0 +1,25 @@
+{
+  "$schema": "https://stryker-mutator.io/schema/stryker-schema.json",
+  "mutate": [
+    "app/shared/components/ui/Button.tsx",
+    "app/shared/components/ui/Modal.tsx",
+    "app/shared/components/ui/ProductTile.tsx",
+    "app/shared/components/ui/Table.tsx"
+  ],
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "npx vitest run tests/components/button.test.tsx tests/components/button.mutation.test.tsx tests/components/modal.test.tsx tests/components/modal.mutation.test.tsx tests/components/product-tile.mutation.test.tsx tests/components/table.mutation.test.tsx tests/components/delta-killers.test.tsx"
+  },
+  "coverageAnalysis": "off",
+  "concurrency": 4,
+  "timeoutMS": 30000,
+  "timeoutFactor": 2,
+  "thresholds": {
+    "high": 80,
+    "low": 70,
+    "break": 70
+  },
+  "reporters": ["clear-text", "progress", "json"],
+  "allowEmpty": false,
+  "cleanTempDir": true
+}

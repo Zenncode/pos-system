@@ -45,7 +45,7 @@ export function startRealtime(): void {
       const env = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
       const url = env["VITE_API_URL"] ?? window.location.origin;
       const socket = mod.io(url, { auth: { token } });
-      socket.emit("join:store", {});
+      socket.emit("join:store", "");
       for (const ev of ["order:created", "order:voided", "stock:low", "report:daily:completed"]) {
         socket.on(ev, (d: unknown) => emit(ev, d));
       }
