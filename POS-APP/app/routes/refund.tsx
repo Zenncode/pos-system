@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { JSX } from "react";
 import { Navigate, useNavigate } from "react-router";
-import { getOrder, listOrders, requestOverride, voidOrder } from "~/lib/api";
+import { ApiError, getOrder, listOrders, requestOverride, voidOrder } from "~/lib/api";
 import { formatCents, formatDateTime } from "~/lib/format";
 import { useAuth, roleAtLeast } from "~/shared/hooks/useAuth";
 import { useToast } from "~/shared/hooks/useToast";
@@ -15,7 +15,7 @@ export function meta(): { title: string }[] {
 }
 
 function canRefund(role: Role | undefined): boolean {
-  return roleAtLeast(role, "MANAGER");
+  return roleAtLeast(role, "CASHIER");
 }
 
 export default function Refund(): JSX.Element {
@@ -37,7 +37,7 @@ export default function Refund(): JSX.Element {
   const allowed = canRefund(user?.role);
 
   useEffect(() => {
-    if (!authLoading && !allowed) push("error", "Manager access required.");
+    if (!authLoading && !allowed) push("error", "Cashier access required.");
   }, [authLoading, allowed, push]);
 
   useEffect(() => {
@@ -45,25 +45,25 @@ export default function Refund(): JSX.Element {
     return () => window.clearTimeout(t);
   }, [q]);
 
-  const load = useCallback(async (): Promise<void> => {
+  const load = useCallback(async (isAlive?: () => boolean): Promise<void> => {
     setLoading(true);
     setListError("");
     try {
       const res = await listOrders({ status: "PAID", q: debouncedQ || undefined });
+      if (isAlive && !isAlive()) return;
       setOrders(res.data);
     } catch {
+      if (isAlive && !isAlive()) return;
       setListError("Failed to load paid orders. Try again.");
     } finally {
-      setLoading(false);
+      if (!isAlive || isAlive()) setLoading(false);
     }
   }, [debouncedQ]);
 
   useEffect(() => {
     let alive = true;
     if (allowed) {
-      void load().finally(() => {
-        if (!alive) return;
-      });
+      void load(() => alive);
     }
     return () => {
       alive = false;
@@ -97,7 +97,6 @@ export default function Refund(): JSX.Element {
       if (needsPin) {
         if (!/^\d{4,8}$/.test(voidPin)) {
           push("error", "Enter the manager PIN (4-8 digits).");
-          setRefundBusy(false);
           return;
         }
         overrideToken = await requestOverride(voidPin);
@@ -108,8 +107,12 @@ export default function Refund(): JSX.Element {
       setReason("");
       setVoidPin("");
       navigate("/orders", { replace: true });
-    } catch {
-      push("error", "Refund failed. Try again.");
+    } catch (e) {
+      if (e instanceof ApiError && e.code === "INVALID_OVERRIDE_PIN") {
+        push("error", "Invalid manager PIN.");
+      } else {
+        push("error", "Refund failed. Try again.");
+      }
     } finally {
       setRefundBusy(false);
     }
